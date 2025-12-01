@@ -13,6 +13,9 @@
         ],
         "CLIENT_DATA": [
             "ORDER_SUMMARY"
+        ],
+        "ORDER_SUMMARY": [
+            "SUCCESS"
         ]
     },
     "screens": [
@@ -451,7 +454,6 @@
         {
             "id": "ORDER_SUMMARY",
             "title": "Resumo do Pedido",
-            "terminal": true,
             "data": {
                 "order_id": {
                     "type": "string",
@@ -459,7 +461,7 @@
                 },
                 "summary_text": {
                     "type": "string",
-                    "__example__": "*RESUMO DO PEDIDO*\n\n*DADOS DO CLIENTE*\nNome: *João Silva*\nCPF: 123.456.789-00\nEmail: joao@email.com\nTelefone: (11) 98765-4321\nData de Nascimento: 01/01/1990\n\n*DADOS DO APARELHO*\nDispositivo: *IPHONE 16 PRO - 128GB*\n\n*PLANO CONTRATADO*\nPlano: *COMPLETO*\nFranquia: Franquia Normal\nForma de Cobrança: Pagamento mensal\n\n*VALOR FINAL*\n*R$ 49,90*"
+                    "__example__": "RESUMO DO PEDIDO\n\nDADOS DO CLIENTE\nNome: João Silva\nCPF: 123.456.789-00\nEmail: joao@email.com\nTelefone: (11) 98765-4321\nData de Nascimento: 01/01/1990\n\nDADOS DO APARELHO\nDispositivo: IPHONE 16 PRO - 128GB\n\nPLANO CONTRATADO\nPlano: COMPLETO\nFranquia: Franquia Normal\nForma de Cobrança: Pagamento mensal\n\nVALOR FINAL\nR$ 49,90"
                 }
             },
             "layout": {
@@ -471,7 +473,38 @@
                     },
                     {
                         "type": "Footer",
-                        "label": "Confirmar e Contratar",
+                        "label": "Confirmar Cotação",
+                        "on-click-action": {
+                            "name": "navigate",
+                            "next": {
+                                "type": "screen",
+                                "name": "SUCCESS"
+                            },
+                            "payload": {}
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "id": "SUCCESS",
+            "title": "Cotação Registrada",
+            "terminal": true,
+            "data": {},
+            "layout": {
+                "type": "SingleColumnLayout",
+                "children": [
+                    {
+                        "type": "TextHeading",
+                        "text": "Cotação foi registrada com sucesso!"
+                    },
+                    {
+                        "type": "TextBody",
+                        "text": "Em breve enviaremos o link para o e-mail cadastrado para realização da vistoria."
+                    },
+                    {
+                        "type": "Footer",
+                        "label": "Finalizar",
                         "on-click-action": {
                             "name": "complete",
                             "payload": {
