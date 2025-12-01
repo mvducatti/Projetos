@@ -509,8 +509,15 @@
                     {
                         "type": "Image",
                         "src": "https://whatsapp-flow-beige.vercel.app/undraw_confirmed_c5lo.png",
-                        "width": 300,
-                        "height": 300,
+                        "width": 250,
+                        "height": 250,
+                        "scale-type": "contain"
+                    },
+                    {
+                        "type": "Image",
+                        "src": "https://whatsapp-flow-beige.vercel.app/undraw_confirmed_c5lo.svg",
+                        "width": 250,
+                        "height": 250,
                         "scale-type": "contain"
                     },
                     {
