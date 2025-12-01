@@ -426,49 +426,58 @@ export default async function handler(req, res) {
         });
       }
       else if (screen === 'IMEI_VALIDATION') {
-        console.log('📱 IMEI_VALIDATION - Validating IMEI (TEST MODE - Only 15 digits check)');
+        console.log('📱 IMEI_VALIDATION - Validating IMEI or Documents');
         console.log('📊 Request data:', JSON.stringify(requestData));
         
         const imei = requestData.imei;
+        const device_documents = requestData.device_documents;
         
-        // Validate IMEI format (15 digits)
-        if (!imei || !/^\d{15}$/.test(imei)) {
+        console.log('🔍 IMEI:', imei);
+        console.log('📄 Documents:', device_documents);
+        
+        // Check if at least one validation method is provided
+        const hasIMEI = imei && imei.trim().length > 0;
+        const hasDocuments = device_documents && Array.isArray(device_documents) && device_documents.length > 0;
+        
+        console.log('✓ Has IMEI:', hasIMEI);
+        console.log('✓ Has Documents:', hasDocuments);
+        
+        // User must provide IMEI OR at least one document
+        if (!hasIMEI && !hasDocuments) {
+          console.log('❌ Validation failed: Neither IMEI nor documents provided');
           return sendEncryptedResponse({
             screen: 'IMEI_VALIDATION',
             data: {
-              imei_error: 'IMEI inválido. Deve conter exatamente 15 dígitos numéricos.',
+              imei_error: 'Forneça o IMEI OU envie pelo menos um documento para continuar.',
               is_validating: false
             }
           });
         }
         
-        // IMEI validation algorithm (Luhn algorithm for IMEI)
-        // const validateIMEI = (imei) => {
-        //   let sum = 0;
-        //   for (let i = 0; i < 14; i++) {
-        //     let digit = parseInt(imei[i]);
-        //     if (i % 2 === 1) {
-        //       digit *= 2;
-        //       if (digit > 9) digit -= 9;
-        //     }
-        //     sum += digit;
-        //   }
-        //   const checkDigit = (10 - (sum % 10)) % 10;
-        //   return checkDigit === parseInt(imei[14]);
-        // };
+        // If IMEI is provided, validate it (only if provided)
+        if (hasIMEI) {
+          console.log('🔍 Validating IMEI format...');
+          // Validate IMEI format (15 digits)
+          if (!/^\d{15}$/.test(imei)) {
+            console.log('❌ IMEI format invalid');
+            return sendEncryptedResponse({
+              screen: 'IMEI_VALIDATION',
+              data: {
+                imei_error: 'IMEI inválido. Deve conter exatamente 15 dígitos numéricos.',
+                is_validating: false
+              }
+            });
+          }
+          console.log('✅ IMEI format valid');
+        }
         
-        // if (!validateIMEI(imei)) {
-        //   return sendEncryptedResponse({
-        //     screen: 'IMEI_VALIDATION',
-        //     data: {
-        //       imei_error: 'IMEI inválido. Verifique os números e tente novamente.',
-        //       is_validating: false
-        //     }
-        //   });
-        // }
+        // If documents are provided, log them
+        if (hasDocuments) {
+          console.log(`✅ ${device_documents.length} document(s) uploaded - bypassing IMEI validation`);
+        }
         
-        // IMEI válido - navegar para próxima tela
-        console.log('✅ IMEI aceito (test mode):', imei);
+        // At least one validation method provided - proceed to next screen
+        console.log('✅ Validation passed - proceeding to CLIENT_DATA');
         return sendEncryptedResponse({
           screen: 'CLIENT_DATA',
           data: {
