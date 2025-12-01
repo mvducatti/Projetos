@@ -1,0 +1,12 @@
+{
+  "name": "vendas-seguro-celular-api",
+  "version": "1.0.0",
+  "description": "API serverless para vendas de seguro celular",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
