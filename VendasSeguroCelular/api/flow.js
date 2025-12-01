@@ -563,8 +563,23 @@ export default async function handler(req, res) {
         const annualPrice = basePrices[selectedPlan].anual * franchiseMultiplier;
         
         const finalPrice = billingType === 'mensal' ? monthlyPrice : annualPrice;
-        const billingLabel = billingType === 'mensal' ? 'mensal' : 'anual';
+        const billingLabel = billingType === 'mensal' ? 'Pagamento mensal' : 'Pagamento anual (11x sem juros)';
         const franchiseLabel = franchise === 'reduzida' ? 'Franquia Reduzida' : 'Franquia Normal';
+        
+        // Format total with payment type
+        let totalDisplay;
+        if (billingType === 'mensal') {
+          totalDisplay = `Mensal de R$ ${finalPrice.toFixed(2)}`;
+        } else {
+          const installmentValue = Math.ceil(annualPrice / 11);
+          totalDisplay = `11x de R$ ${installmentValue.toFixed(2)} sem juros`;
+        }
+        
+        // Format client data
+        const formattedCpf = cpfClean.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+        const formattedPhone = phoneClean.length === 11 
+          ? phoneClean.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3')
+          : phoneClean.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
         
         console.log('✅ Summary built for ORDER_SUMMARY');
         
@@ -574,11 +589,16 @@ export default async function handler(req, res) {
         return sendEncryptedResponse({
           screen: 'ORDER_SUMMARY',
           data: {
-            summary: {
-              device: `${device.DeModel} - ${device.DeMemory}`,
-              plan: `${planNames[selectedPlan]} (${franchiseLabel}) - Pagamento ${billingLabel}`,
-              total: `R$ ${finalPrice.toFixed(2)}`
-            }
+            client_name: full_name,
+            client_cpf: formattedCpf,
+            client_email: email,
+            client_phone: formattedPhone,
+            client_birth_date: birth_date,
+            device: `${device.DeModel} - ${device.DeMemory}`,
+            plan_name: planNames[selectedPlan],
+            franchise: franchiseLabel,
+            billing_type: billingLabel,
+            total: totalDisplay
           }
         });
       }
