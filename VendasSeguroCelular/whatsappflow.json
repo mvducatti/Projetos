@@ -127,16 +127,13 @@
                         "type": "Footer",
                         "label": "Continuar",
                         "on-click-action": {
-                            "name": "navigate",
-                            "next": {
-                                "type": "screen",
-                                "name": "PLAN_SELECTION"
-                            },
+                            "name": "data_exchange",
                             "payload": {
                                 "device_id": "${data.device_id}",
                                 "brand": "${form.brand}",
                                 "model": "${form.model}",
-                                "memory": "${form.memory}"
+                                "memory": "${form.memory}",
+                                "navigate_to": "PLAN_SELECTION"
                             }
                         }
                     }

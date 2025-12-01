@@ -281,52 +281,84 @@ export default async function handler(req, res) {
       if (screen === 'DEVICE_SELECTION') {
         console.log('🔍 Received payload:', JSON.stringify(requestData, null, 2));
         
-        try {
-          const brands = await getBrands();
-          console.log(`✅ Brands loaded: ${brands.length}`);
+        // Check if user wants to navigate to next screen
+        if (requestData.navigate_to === 'PLAN_SELECTION') {
+          console.log('🚀 Navigating to PLAN_SELECTION with device_id:', requestData.device_id);
           
-          let models = [];
-          let memories = [];
-          let device_id = '';
-
-          // Se tem brand, carrega modelos
-          if (requestData.selected_brand) {
-            console.log('🏷️ Loading models for brand:', requestData.selected_brand);
-            models = await getModels(requestData.selected_brand);
-            console.log(`✅ Loaded ${models.length} models`);
-          }
-
-          // Se tem model, carrega memórias
-          if (requestData.selected_model) {
-            console.log('📱 Loading memories for model:', requestData.selected_model);
-            memories = await getMemory(requestData.selected_model);
-            console.log(`✅ Loaded ${memories.length} memories`);
-          }
-
-          // Se tem memory, o device_id é o próprio ID da memória selecionada
-          if (requestData.selected_memory) {
-            console.log('💾 Memory selected with ID:', requestData.selected_memory);
-            device_id = requestData.selected_memory;
-            console.log('✅ Device ID set to:', device_id);
-          }
-
-          responseData = {
-            screen: 'DEVICE_SELECTION',
-            data: {
-              brands: brands,
-              models: models,
-              memories: memories,
-              selected_brand: requestData.selected_brand || '',
-              selected_model: requestData.selected_model || '',
-              selected_memory: requestData.selected_memory || '',
-              device_id: device_id
+          const deviceId = requestData.device_id;
+          if (deviceId) {
+            const device = await getDeviceDetails(deviceId);
+            console.log('📱 Device details for PLAN_SELECTION:', device);
+            
+            if (device) {
+              responseData = {
+                screen: 'PLAN_SELECTION',
+                data: {
+                  device_info: {
+                    model: device.DeModel,
+                    memory: device.DeMemory,
+                    price: device.FormattedPrice
+                  }
+                }
+              };
+              console.log('✅ PLAN_SELECTION response prepared:', JSON.stringify(responseData.data));
+            } else {
+              console.error('❌ Device not found for ID:', deviceId);
             }
-          };
-          
-          console.log('📤 Response prepared successfully');
-        } catch (innerError) {
-          console.error('❌ Error processing DEVICE_SELECTION:', innerError.message);
-          throw innerError;
+          } else {
+            console.error('❌ No device_id received');
+          }
+        } 
+        // Normal DEVICE_SELECTION interactions (dropdowns)
+        else {
+          // Normal DEVICE_SELECTION interactions
+          try {
+            const brands = await getBrands();
+            console.log(`✅ Brands loaded: ${brands.length}`);
+            
+            let models = [];
+            let memories = [];
+            let device_id = '';
+
+            // Se tem brand, carrega modelos
+            if (requestData.selected_brand) {
+              console.log('🏷️ Loading models for brand:', requestData.selected_brand);
+              models = await getModels(requestData.selected_brand);
+              console.log(`✅ Loaded ${models.length} models`);
+            }
+
+            // Se tem model, carrega memórias
+            if (requestData.selected_model) {
+              console.log('📱 Loading memories for model:', requestData.selected_model);
+              memories = await getMemory(requestData.selected_model);
+              console.log(`✅ Loaded ${memories.length} memories`);
+            }
+
+            // Se tem memory, o device_id é o próprio ID da memória selecionada
+            if (requestData.selected_memory) {
+              console.log('💾 Memory selected with ID:', requestData.selected_memory);
+              device_id = requestData.selected_memory;
+              console.log('✅ Device ID set to:', device_id);
+            }
+
+            responseData = {
+              screen: 'DEVICE_SELECTION',
+              data: {
+                brands: brands,
+                models: models,
+                memories: memories,
+                selected_brand: requestData.selected_brand || '',
+                selected_model: requestData.selected_model || '',
+                selected_memory: requestData.selected_memory || '',
+                device_id: device_id
+              }
+            };
+            
+            console.log('📤 Response prepared successfully');
+          } catch (innerError) {
+            console.error('❌ Error processing DEVICE_SELECTION:', innerError.message);
+            throw innerError;
+          }
         }
       }
       else if (screen === 'PLAN_SELECTION') {
