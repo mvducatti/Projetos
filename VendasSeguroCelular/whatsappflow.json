@@ -186,12 +186,22 @@
                         "text": "Escolha seu Plano"
                     },
                     {
-                        "type": "TextBody",
-                        "text": "Aparelho: ${data.device_model} - ${data.device_memory}"
+                        "type": "TextSubheading",
+                        "text": "📱 Aparelho Selecionado"
                     },
                     {
-                        "type": "TextBody",
-                        "text": "Valor do aparelho: ${data.device_price}"
+                        "type": "RadioButtonsGroup",
+                        "name": "device_info_display",
+                        "label": "Informações do Aparelho",
+                        "required": false,
+                        "data-source": [
+                            {
+                                "id": "device",
+                                "title": "${data.device_model}",
+                                "description": "Memória: ${data.device_memory}\nPreço: ${data.device_price}",
+                                "enabled": false
+                            }
+                        ]
                     },
                     {
                         "type": "TextSubheading",

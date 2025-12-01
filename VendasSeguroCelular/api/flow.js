@@ -287,7 +287,13 @@ export default async function handler(req, res) {
             console.log('📱 Device details for PLAN_SELECTION:', device);
             
             if (device) {
-              // Return ONLY screen and data, WITHOUT navigate_to
+              console.log('✅ Sending device data:', {
+                device_model: device.DeModel,
+                device_memory: device.DeMemory,
+                device_price: device.FormattedPrice
+              });
+              
+              // Return PLAN_SELECTION screen with device data
               return sendEncryptedResponse({
                 screen: 'PLAN_SELECTION',
                 data: {
