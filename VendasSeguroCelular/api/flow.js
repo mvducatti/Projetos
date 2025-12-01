@@ -739,6 +739,41 @@ ${totalDisplay}`;
       throw new Error('Unhandled screen or missing data');
     }
 
+    // Handle complete action (final order submission)
+    if (action === 'complete') {
+      console.log('✅ COMPLETE - Finalizing order');
+      console.log('📊 Complete payload:', JSON.stringify(requestData));
+      
+      // Combine form data with stored data
+      const finalOrder = {
+        ...requestData,
+        order_timestamp: new Date().toISOString(),
+        flow_token: flow_token
+      };
+      
+      console.log('📦 Final order data:', finalOrder);
+      
+      // In production, save to database and send to insurance provider
+      console.log('💾 Order completed successfully!');
+      console.log('📋 Final order summary:');
+      console.log(`   Cliente: ${finalOrder.client_name}`);
+      console.log(`   CPF: ${finalOrder.client_cpf}`);
+      console.log(`   Aparelho: ${finalOrder.brand} ${finalOrder.model} ${finalOrder.memory}`);
+      console.log(`   Plano: ${finalOrder.plan}`);
+      console.log(`   Franquia: ${finalOrder.franchise}`);
+      console.log(`   Cobrança: ${finalOrder.billing_type}`);
+      
+      // Clean up stored data
+      orderDataStore.delete(flow_token);
+      
+      return sendEncryptedResponse({
+        data: {
+          success_msg: 'Pedido finalizado com sucesso! Em breve entraremos em contato.',
+          order_id: flow_token
+        }
+      });
+    }
+
     // Unknown action
     console.error('❌ Unknown action:', action);
     return sendEncryptedResponse({
