@@ -457,109 +457,17 @@
                     "type": "string",
                     "__example__": "abc123"
                 },
-                "client_name": {
+                "summary_text": {
                     "type": "string",
-                    "__example__": "João Silva"
-                },
-                "client_cpf": {
-                    "type": "string",
-                    "__example__": "123.456.789-00"
-                },
-                "client_email": {
-                    "type": "string",
-                    "__example__": "joao@email.com"
-                },
-                "client_phone": {
-                    "type": "string",
-                    "__example__": "(11) 98765-4321"
-                },
-                "client_birth_date": {
-                    "type": "string",
-                    "__example__": "01/01/1990"
-                },
-                "device": {
-                    "type": "string",
-                    "__example__": "IPHONE 16 PRO - 128GB"
-                },
-                "plan_name": {
-                    "type": "string",
-                    "__example__": "COMPLETO"
-                },
-                "franchise": {
-                    "type": "string",
-                    "__example__": "Franquia Normal"
-                },
-                "billing_type": {
-                    "type": "string",
-                    "__example__": "Pagamento mensal"
-                },
-                "total": {
-                    "type": "string",
-                    "__example__": "R$ 49,90"
+                    "__example__": "RESUMO DO PEDIDO\n\nDADOS DO CLIENTE\nNome: João Silva\nCPF: 123.456.789-00\nEmail: joao@email.com\nTelefone: (11) 98765-4321\nData de Nascimento: 01/01/1990\n\nDADOS DO APARELHO\nDispositivo: IPHONE 16 PRO - 128GB\n\nPLANO CONTRATADO\nPlano: COMPLETO\nFranquia: Franquia Normal\nForma de Cobrança: Pagamento mensal\n\nVALOR FINAL\nR$ 49,90"
                 }
             },
             "layout": {
                 "type": "SingleColumnLayout",
                 "children": [
                     {
-                        "type": "TextHeading",
-                        "text": "Resumo do Pedido"
-                    },
-                    {
-                        "type": "TextSubheading",
-                        "text": "Dados do Cliente"
-                    },
-                    {
                         "type": "TextBody",
-                        "text": "Nome: ${data.client_name}"
-                    },
-                    {
-                        "type": "TextBody",
-                        "text": "CPF: ${data.client_cpf}"
-                    },
-                    {
-                        "type": "TextBody",
-                        "text": "Email: ${data.client_email}"
-                    },
-                    {
-                        "type": "TextBody",
-                        "text": "Telefone: ${data.client_phone}"
-                    },
-                    {
-                        "type": "TextBody",
-                        "text": "Data de Nascimento: ${data.client_birth_date}"
-                    },
-                    {
-                        "type": "TextSubheading",
-                        "text": "Dados do Aparelho"
-                    },
-                    {
-                        "type": "TextBody",
-                        "text": "Dispositivo: ${data.device}"
-                    },
-                    {
-                        "type": "TextSubheading",
-                        "text": "Plano Contratado"
-                    },
-                    {
-                        "type": "TextBody",
-                        "text": "Plano: ${data.plan_name}"
-                    },
-                    {
-                        "type": "TextBody",
-                        "text": "Franquia: ${data.franchise}"
-                    },
-                    {
-                        "type": "TextBody",
-                        "text": "Forma de Cobrança: ${data.billing_type}"
-                    },
-                    {
-                        "type": "TextSubheading",
-                        "text": "Valor Final"
-                    },
-                    {
-                        "type": "TextBody",
-                        "text": "${data.total}"
+                        "text": "${data.summary_text}"
                     },
                     {
                         "type": "Footer",

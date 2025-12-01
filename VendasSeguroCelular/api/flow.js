@@ -660,20 +660,33 @@ export default async function handler(req, res) {
         console.log('📋 Order summary:', orderSummary);
         
         // Navigate to ORDER_SUMMARY with all data
+        // WhatsApp Flows TERMINAL SCREENS limitation: Must send ALL text as a SINGLE variable
+        // Multiple ${data.field} variables don't work in terminal screens
+        const summaryText = `RESUMO DO PEDIDO
+
+DADOS DO CLIENTE
+Nome: ${full_name}
+CPF: ${formattedCpf}
+Email: ${formattedEmail}
+Telefone: ${formattedPhone}
+Data de Nascimento: ${birth_date}
+
+DADOS DO APARELHO
+Dispositivo: ${device.DeModel} - ${device.DeMemory}
+
+PLANO CONTRATADO
+Plano: ${planNames[selectedPlan]}
+Franquia: ${franchiseLabel}
+Forma de Cobrança: ${billingLabel}
+
+VALOR FINAL
+${totalDisplay}`;
+        
         const responseData = {
           screen: 'ORDER_SUMMARY',
           data: {
             order_id: flow_token,
-            client_name: full_name,
-            client_cpf: formattedCpf,
-            client_email: formattedEmail,
-            client_phone: formattedPhone,
-            client_birth_date: birth_date,
-            device: `${device.DeModel} - ${device.DeMemory}`,
-            plan_name: planNames[selectedPlan],
-            franchise: franchiseLabel,
-            billing_type: billingLabel,
-            total: totalDisplay
+            summary_text: summaryText
           }
         };
         
