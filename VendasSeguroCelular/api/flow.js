@@ -6,6 +6,9 @@ import deviceHandler from './device.js';
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
+// Temporary storage for order data (in production, use a real database)
+const orderDataStore = new Map();
+
 function decryptRequest(encryptedFlowData, encryptedAesKey, initialVector) {
   try {
     const decryptedAesKey = crypto.privateDecrypt(
@@ -470,7 +473,8 @@ export default async function handler(req, res) {
           screen: 'CLIENT_DATA',
           data: {
             cpf_error: '',
-            phone_error: ''
+            phone_error: '',
+            birth_date_error: ''
           }
         });
       }
@@ -482,6 +486,23 @@ export default async function handler(req, res) {
         
         let cpf_error = '';
         let phone_error = '';
+        let birth_date_error = '';
+        
+        // Validate birth date (must be 18+ years old)
+        if (birth_date) {
+          const birthDate = new Date(birth_date);
+          const today = new Date();
+          let age = today.getFullYear() - birthDate.getFullYear();
+          const monthDiff = today.getMonth() - birthDate.getMonth();
+          
+          if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+          }
+          
+          if (age < 18) {
+            birth_date_error = 'Você deve ter pelo menos 18 anos para contratar o seguro.';
+          }
+        }
         
         // Validate CPF (11 digits)
         const cpfClean = cpf ? cpf.replace(/\D/g, '') : '';
@@ -521,13 +542,14 @@ export default async function handler(req, res) {
         }
         
         // If there are errors, return to CLIENT_DATA with error messages
-        if (cpf_error || phone_error) {
-          console.log('❌ Validation errors:', { cpf_error, phone_error });
+        if (cpf_error || phone_error || birth_date_error) {
+          console.log('❌ Validation errors:', { cpf_error, phone_error, birth_date_error });
           return sendEncryptedResponse({
             screen: 'CLIENT_DATA',
             data: {
               cpf_error: cpf_error,
-              phone_error: phone_error
+              phone_error: phone_error,
+              birth_date_error: birth_date_error
             }
           });
         }
@@ -580,27 +602,89 @@ export default async function handler(req, res) {
         const formattedPhone = phoneClean.length === 11 
           ? phoneClean.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3')
           : phoneClean.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+        const formattedEmail = email ? email.toLowerCase() : '';
         
         console.log('✅ Summary built for ORDER_SUMMARY');
         
-        // TODO: Salvar no banco de dados
-        // await saveOrderData(flow_token, orderData);
+        // Save order data temporarily (in production, use database)
+        const orderSummary = {
+          client_name: full_name,
+          client_cpf: formattedCpf,
+          client_email: formattedEmail,
+          client_phone: formattedPhone,
+          client_birth_date: birth_date,
+          device: `${device.DeModel} - ${device.DeMemory}`,
+          plan_name: planNames[selectedPlan],
+          franchise: franchiseLabel,
+          billing_type: billingLabel,
+          total: totalDisplay
+        };
         
+        orderDataStore.set(flow_token, orderSummary);
+        console.log('💾 Saved order data for flow_token:', flow_token);
+        console.log('📋 Order summary:', orderSummary);
+        
+        // Navigate to ORDER_SUMMARY with flow_token to retrieve data
         return sendEncryptedResponse({
           screen: 'ORDER_SUMMARY',
           data: {
-            client_name: full_name,
-            client_cpf: formattedCpf,
-            client_email: email,
-            client_phone: formattedPhone,
-            client_birth_date: birth_date,
-            device: `${device.DeModel} - ${device.DeMemory}`,
-            plan_name: planNames[selectedPlan],
-            franchise: franchiseLabel,
-            billing_type: billingLabel,
-            total: totalDisplay
+            order_id: flow_token,
+            is_loaded: false,
+            client_name: '',
+            client_cpf: '',
+            client_email: '',
+            client_phone: '',
+            client_birth_date: '',
+            device: '',
+            plan_name: '',
+            franchise: '',
+            billing_type: '',
+            total: ''
           }
         });
+      }
+      else if (screen === 'ORDER_SUMMARY') {
+        console.log('📋 ORDER_SUMMARY - Loading order data');
+        console.log('📊 Request data:', JSON.stringify(requestData));
+        
+        if (requestData.load_summary) {
+          const orderId = requestData.order_id;
+          console.log('🔍 Looking for order_id:', orderId);
+          
+          const orderSummary = orderDataStore.get(orderId);
+          
+          if (orderSummary) {
+            console.log('✅ Found order data:', orderSummary);
+            
+            return sendEncryptedResponse({
+              screen: 'ORDER_SUMMARY',
+              data: {
+                order_id: orderId,
+                is_loaded: true,
+                ...orderSummary
+              }
+            });
+          } else {
+            console.error('❌ Order data not found for order_id:', orderId);
+            return sendEncryptedResponse({
+              screen: 'ORDER_SUMMARY',
+              data: {
+                order_id: orderId,
+                is_loaded: true,
+                client_name: 'Erro ao carregar dados',
+                client_cpf: '',
+                client_email: '',
+                client_phone: '',
+                client_birth_date: '',
+                device: 'Erro',
+                plan_name: 'Erro',
+                franchise: '',
+                billing_type: '',
+                total: 'R$ 0,00'
+              }
+            });
+          }
+        }
       }
 
       throw new Error('Unhandled screen or missing data');

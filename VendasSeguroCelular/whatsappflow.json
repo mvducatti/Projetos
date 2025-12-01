@@ -367,6 +367,10 @@
                 "phone_error": {
                     "type": "string",
                     "__example__": ""
+                },
+                "birth_date_error": {
+                    "type": "string",
+                    "__example__": ""
                 }
             },
             "layout": {
@@ -403,7 +407,7 @@
                         "label": "E-mail",
                         "input-type": "email",
                         "required": true,
-                        "helper-text": "Para envio da apólice"
+                        "helper-text": "Para envio da apólice (use apenas minúsculas)"
                     },
                     {
                         "type": "TextInput",
@@ -418,7 +422,9 @@
                         "type": "DatePicker",
                         "name": "birth_date",
                         "label": "Data de Nascimento",
-                        "required": true
+                        "required": true,
+                        "helper-text": "Você deve ter pelo menos 18 anos",
+                        "error-message": "${data.birth_date_error}"
                     },
                     {
                         "type": "Footer",
@@ -447,6 +453,10 @@
             "title": "Resumo do Pedido",
             "terminal": true,
             "data": {
+                "order_id": {
+                    "type": "string",
+                    "__example__": "abc123"
+                },
                 "client_name": {
                     "type": "string",
                     "__example__": "João Silva"
@@ -486,78 +496,122 @@
                 "total": {
                     "type": "string",
                     "__example__": "R$ 49,90"
+                },
+                "is_loaded": {
+                    "type": "boolean",
+                    "__example__": false
                 }
             },
             "layout": {
                 "type": "SingleColumnLayout",
                 "children": [
                     {
-                        "type": "TextHeading",
-                        "text": "Resumo do Pedido"
-                    },
-                    {
-                        "type": "TextSubheading",
-                        "text": "Dados do Cliente"
-                    },
-                    {
-                        "type": "TextBody",
-                        "text": "Nome: ${data.client_name}"
-                    },
-                    {
-                        "type": "TextBody",
-                        "text": "CPF: ${data.client_cpf}"
-                    },
-                    {
-                        "type": "TextBody",
-                        "text": "E-mail: ${data.client_email}"
-                    },
-                    {
-                        "type": "TextBody",
-                        "text": "Telefone: ${data.client_phone}"
-                    },
-                    {
-                        "type": "TextBody",
-                        "text": "Data de Nascimento: ${data.client_birth_date}"
-                    },
-                    {
-                        "type": "TextSubheading",
-                        "text": "Aparelho"
-                    },
-                    {
-                        "type": "TextBody",
-                        "text": "${data.device}"
-                    },
-                    {
-                        "type": "TextSubheading",
-                        "text": "Plano Selecionado"
-                    },
-                    {
-                        "type": "TextBody",
-                        "text": "${data.plan_name}"
-                    },
-                    {
-                        "type": "TextBody",
-                        "text": "${data.franchise}"
-                    },
-                    {
-                        "type": "TextBody",
-                        "text": "${data.billing_type}"
-                    },
-                    {
-                        "type": "TextSubheading",
-                        "text": "Valor Total"
+                        "type": "If",
+                        "condition": "${data.is_loaded}",
+                        "then": [
+                            {
+                                "type": "TextHeading",
+                                "text": "Resumo do Pedido"
+                            }
+                        ],
+                        "else": [
+                            {
+                                "type": "EmbeddedLink",
+                                "text": "Carregando...",
+                                "on-click-action": {
+                                    "name": "data_exchange",
+                                    "payload": {
+                                        "order_id": "${data.order_id}",
+                                        "load_summary": true
+                                    }
+                                }
+                            }
+                        ]
                     },
                     {
                         "type": "TextHeading",
-                        "text": "${data.total}"
+                        "text": "Resumo do Pedido",
+                        "visible": "${data.is_loaded}"
+                    },
+                    {
+                        "type": "TextSubheading",
+                        "text": "Dados do Cliente",
+                        "visible": "${data.is_loaded}"
+                    },
+                    {
+                        "type": "TextBody",
+                        "text": "Nome: ${data.client_name}",
+                        "visible": "${data.is_loaded}"
+                    },
+                    {
+                        "type": "TextBody",
+                        "text": "CPF: ${data.client_cpf}",
+                        "visible": "${data.is_loaded}"
+                    },
+                    {
+                        "type": "TextBody",
+                        "text": "E-mail: ${data.client_email}",
+                        "visible": "${data.is_loaded}"
+                    },
+                    {
+                        "type": "TextBody",
+                        "text": "Telefone: ${data.client_phone}",
+                        "visible": "${data.is_loaded}"
+                    },
+                    {
+                        "type": "TextBody",
+                        "text": "Data de Nascimento: ${data.client_birth_date}",
+                        "visible": "${data.is_loaded}"
+                    },
+                    {
+                        "type": "TextSubheading",
+                        "text": "Aparelho",
+                        "visible": "${data.is_loaded}"
+                    },
+                    {
+                        "type": "TextBody",
+                        "text": "${data.device}",
+                        "visible": "${data.is_loaded}"
+                    },
+                    {
+                        "type": "TextSubheading",
+                        "text": "Plano Selecionado",
+                        "visible": "${data.is_loaded}"
+                    },
+                    {
+                        "type": "TextBody",
+                        "text": "${data.plan_name}",
+                        "visible": "${data.is_loaded}"
+                    },
+                    {
+                        "type": "TextBody",
+                        "text": "${data.franchise}",
+                        "visible": "${data.is_loaded}"
+                    },
+                    {
+                        "type": "TextBody",
+                        "text": "${data.billing_type}",
+                        "visible": "${data.is_loaded}"
+                    },
+                    {
+                        "type": "TextSubheading",
+                        "text": "Valor Total",
+                        "visible": "${data.is_loaded}"
+                    },
+                    {
+                        "type": "TextHeading",
+                        "text": "${data.total}",
+                        "visible": "${data.is_loaded}"
                     },
                     {
                         "type": "TextCaption",
-                        "text": "- Cobertura imediata após pagamento\n- Cancelamento sem multa\n- Aparelho reserva em 24h"
+                        "text": "- Cobertura imediata após pagamento\n- Cancelamento sem multa\n- Aparelho reserva em 24h",
+                        "visible": "${data.is_loaded}"
                     },
                     {
                         "type": "Footer",
                         "label": "Confirmar e Contratar",
+                        "enabled": "${data.is_loaded}",
                         "on-click-action": {
                             "name": "complete",
                             "payload": {
