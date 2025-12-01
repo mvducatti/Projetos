@@ -300,6 +300,7 @@ export default async function handler(req, res) {
                   device_model: device.DeModel,
                   device_memory: device.DeMemory,
                   device_price: device.FormattedPrice,
+                  selected_plan_name: 'Selecione as opções acima',
                   price_display: [
                     {
                       id: 'price',
@@ -394,16 +395,14 @@ export default async function handler(req, res) {
           'completo': 'COMPLETO'
         };
         
-        let priceTitle, priceInstallments;
+        let priceTitle;
         
         if (billing_type === 'mensal') {
           const installments = Math.ceil(monthlyPrice);
-          priceTitle = `Valor mensal: R$ ${monthlyPrice.toFixed(2)}`;
-          priceInstallments = `Em até 11x sem juros de R$ ${installments.toFixed(2)}`;
+          priceTitle = `Valor mensal de R$ ${monthlyPrice.toFixed(2)}\n\nEm até 11x sem juros de R$ ${installments.toFixed(2)}`;
         } else {
           const installments = Math.ceil(annualPrice / 11);
-          priceTitle = `Valor anual: R$ ${annualPrice.toFixed(2)}`;
-          priceInstallments = `Em até 11x sem juros de R$ ${installments.toFixed(2)}`;
+          priceTitle = `Valor mensal de R$ ${monthlyPrice.toFixed(2)}\n\nEm até 11x sem juros de R$ ${installments.toFixed(2)}`;
         }
         
         return sendEncryptedResponse({
@@ -412,11 +411,12 @@ export default async function handler(req, res) {
             device_model: requestData.device_model || '',
             device_memory: requestData.device_memory || '',
             device_price: requestData.device_price || '',
+            selected_plan_name: planNames[selected_plan],
             price_display: [
               {
                 id: 'price',
                 title: priceTitle,
-                description: `${planNames[selected_plan]}\n\n${priceInstallments}`
+                description: planNames[selected_plan]
               }
             ]
           }

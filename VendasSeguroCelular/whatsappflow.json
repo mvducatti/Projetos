@@ -159,6 +159,10 @@
                     "type": "string",
                     "__example__": "R$ 7.999,00"
                 },
+                "selected_plan_name": {
+                    "type": "string",
+                    "__example__": "SUPER ECON\u00d4MICO"
+                },
                 "price_display": {
                     "type": "array",
                     "items": {
@@ -172,8 +176,8 @@
                     "__example__": [
                         {
                             "id": "price",
-                            "title": "Valor mensal: R$ 19,90",
-                            "description": "SUPER ECONÔMICO\n\nEm até 11x sem juros de R$ 20,00"
+                            "title": "Valor mensal de R$ 19,90",
+                            "description": "SUPER ECONÔMICO"
                         }
                     ]
                 }
@@ -276,7 +280,7 @@
                     },
                     {
                         "type": "TextSubheading",
-                        "text": "💰 Valor Final"
+                        "text": "Valor Final"
                     },
                     {
                         "type": "RadioButtonsGroup",
