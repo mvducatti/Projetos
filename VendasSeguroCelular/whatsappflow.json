@@ -496,11 +496,22 @@
                 "children": [
                     {
                         "type": "TextHeading",
-                        "text": "Cotação foi registrada com sucesso!"
+                        "text": "Cotação registrada com sucesso!"
                     },
                     {
                         "type": "TextBody",
                         "text": "Em breve enviaremos o link para o e-mail cadastrado para realização da vistoria."
+                    },
+                    {
+                        "type": "TextBody",
+                        "text": "Obrigado por escolher a Zurich!"
+                    },
+                    {
+                        "type": "Image",
+                        "src": "https://whatsapp-flow-beige.vercel.app/undraw_confirmed_c5lo.svg",
+                        "width": 300,
+                        "height": 300,
+                        "scale-type": "contain"
                     },
                     {
                         "type": "Footer",
