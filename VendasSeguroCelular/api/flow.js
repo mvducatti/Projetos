@@ -281,60 +281,89 @@ export default async function handler(req, res) {
 
       // Handle different screens
       if (screen === 'DEVICE_SELECTION') {
-        console.log('🔍 Analyzing request data:', {
-          has_brand: !!requestData.selected_brand,
-          has_model: !!requestData.selected_model,
-          has_memory: !!requestData.selected_memory
+        console.log('🔍 Checking what was selected:', {
+          brand: requestData.selected_brand,
+          model: requestData.selected_model,
+          memory: requestData.selected_memory
         });
 
-        // Memory selected - set device ID
+        // Memory selected - set device ID and keep everything
         if (requestData.selected_memory) {
-          console.log('💾 Memory selected, fetching device ID...');
+          console.log('💾 Memory selected:', requestData.selected_memory);
+          const brands = await getBrands();
+          const models = await getModels(requestData.selected_brand);
           const memories = await getMemory(requestData.selected_model);
           const selectedMemory = memories.find(m => m.id === requestData.selected_memory);
           
           responseData = {
             screen: 'DEVICE_SELECTION',
             data: {
+              brands: brands,
+              models: models,
+              memories: memories,
+              selected_brand: requestData.selected_brand,
+              selected_model: requestData.selected_model,
+              selected_memory: requestData.selected_memory,
               device_id: selectedMemory ? selectedMemory.metadata.device_id.toString() : ''
             }
           };
           console.log('✅ Device ID set:', responseData.data.device_id);
         }
-        // Model selected - send memories
+        // Model selected - send memories and keep brands/models
         else if (requestData.selected_model) {
-          console.log('📱 Model selected, fetching memories...');
+          console.log('📱 Model selected:', requestData.selected_model);
+          const brands = await getBrands();
+          const models = await getModels(requestData.selected_brand);
           const memories = await getMemory(requestData.selected_model);
           console.log(`✅ Found ${memories.length} memory options`);
+          
           responseData = {
             screen: 'DEVICE_SELECTION',
             data: {
-              memories: memories
+              brands: brands,
+              models: models,
+              memories: memories,
+              selected_brand: requestData.selected_brand,
+              selected_model: requestData.selected_model,
+              selected_memory: '',
+              device_id: ''
             }
           };
         }
-        // Brand selected - send models
+        // Brand selected - send models and keep brands
         else if (requestData.selected_brand) {
-          console.log('🏷️ Brand selected, fetching models...');
+          console.log('🏷️ Brand selected:', requestData.selected_brand);
+          const brands = await getBrands();
           const models = await getModels(requestData.selected_brand);
           console.log(`✅ Found ${models.length} models`);
+          
           responseData = {
             screen: 'DEVICE_SELECTION',
             data: {
-              models: models
+              brands: brands,
+              models: models,
+              memories: [],
+              selected_brand: requestData.selected_brand,
+              selected_model: '',
+              selected_memory: '',
+              device_id: ''
             }
           };
         }
-        // Fallback - resend brands (shouldn't happen)
+        // Fallback - resend brands
         else {
-          console.log('⚠️ Fallback: No selection detected, resending brands');
+          console.log('⚠️ Fallback: resending brands');
           const brands = await getBrands();
           responseData = {
             screen: 'DEVICE_SELECTION',
             data: {
               brands: brands,
               models: [],
-              memories: []
+              memories: [],
+              selected_brand: '',
+              selected_model: '',
+              selected_memory: '',
+              device_id: ''
             }
           };
         }
