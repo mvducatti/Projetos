@@ -532,41 +532,55 @@ export default async function handler(req, res) {
           });
         }
         
-        // All valid - navigate to ORDER_SUMMARY
+        // All valid - save order data and navigate to ORDER_SUMMARY
         console.log('✅ Client data validated successfully');
+        
+        // Get device and plan data from payload
+        const deviceId = requestData.device_id;
+        const selectedPlan = requestData.plan;
+        const franchise = requestData.franchise;
+        const billingType = requestData.billing_type;
+        
+        console.log('📦 Order data:', { deviceId, selectedPlan, franchise, billingType });
+        
+        // Build summary for ORDER_SUMMARY screen
+        const device = await getDeviceDetails(deviceId);
+        
+        const basePrices = {
+          'super_economico': { mensal: 19.90, anual: 215.00 },
+          'economico': { mensal: 34.90, anual: 383.00 },
+          'completo': { mensal: 49.90, anual: 539.00 }
+        };
+        
+        const planNames = {
+          'super_economico': 'SUPER ECONÔMICO',
+          'economico': 'ECONÔMICO',
+          'completo': 'COMPLETO'
+        };
+        
+        const franchiseMultiplier = franchise === 'reduzida' ? 1.15 : 1.0;
+        const monthlyPrice = basePrices[selectedPlan].mensal * franchiseMultiplier;
+        const annualPrice = basePrices[selectedPlan].anual * franchiseMultiplier;
+        
+        const finalPrice = billingType === 'mensal' ? monthlyPrice : annualPrice;
+        const billingLabel = billingType === 'mensal' ? 'mensal' : 'anual';
+        const franchiseLabel = franchise === 'reduzida' ? 'Franquia Reduzida' : 'Franquia Normal';
+        
+        console.log('✅ Summary built for ORDER_SUMMARY');
+        
+        // TODO: Salvar no banco de dados
+        // await saveOrderData(flow_token, orderData);
+        
         return sendEncryptedResponse({
           screen: 'ORDER_SUMMARY',
-          data: {}
-        });
-      }
-      else if (screen === 'ORDER_SUMMARY') {
-        // Build summary
-        const deviceId = requestData.device_id;
-        const plan = requestData.plan;
-        
-        if (deviceId) {
-          const device = await getDeviceDetails(deviceId);
-          
-          const planPrices = {
-            'super_economico': { value: 19.90, pix: 18.90 },
-            'economico': { value: 34.90, pix: 33.15 },
-            'completo': { value: 49.90, pix: 47.40 }
-          };
-          
-          const selectedPlan = planPrices[plan] || planPrices.completo;
-          
-          return sendEncryptedResponse({
-            screen: 'ORDER_SUMMARY',
-            data: {
-              summary: {
-                device: `${device.DeModel} - ${device.DeMemory}`,
-                plan: `${plan.toUpperCase()} - R$ ${selectedPlan.value.toFixed(2)}`,
-                total: `R$ ${selectedPlan.value.toFixed(2)}`,
-                total_pix: `R$ ${selectedPlan.pix.toFixed(2)}`
-              }
+          data: {
+            summary: {
+              device: `${device.DeModel} - ${device.DeMemory}`,
+              plan: `${planNames[selectedPlan]} (${franchiseLabel}) - Pagamento ${billingLabel}`,
+              total: `R$ ${finalPrice.toFixed(2)}`
             }
-          });
-        }
+          }
+        });
       }
 
       throw new Error('Unhandled screen or missing data');

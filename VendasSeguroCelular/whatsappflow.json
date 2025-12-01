@@ -431,7 +431,11 @@
                                 "email": "${form.email}",
                                 "phone": "${form.phone}",
                                 "birth_date": "${form.birth_date}",
-                                "validate_client_data": true
+                                "validate_client_data": true,
+                                "device_id": "${screen.DEVICE_SELECTION.data.device_id}",
+                                "plan": "${screen.PLAN_SELECTION.form.plan}",
+                                "franchise": "${screen.PLAN_SELECTION.form.franchise}",
+                                "billing_type": "${screen.PLAN_SELECTION.form.billing_type}"
                             }
                         }
                     }
@@ -499,6 +503,9 @@
                                 "memory": "${screen.DEVICE_SELECTION.form.memory}",
                                 "device_id": "${screen.DEVICE_SELECTION.data.device_id}",
                                 "plan": "${screen.PLAN_SELECTION.form.plan}",
+                                "franchise": "${screen.PLAN_SELECTION.form.franchise}",
+                                "billing_type": "${screen.PLAN_SELECTION.form.billing_type}",
+                                "imei": "${screen.IMEI_VALIDATION.form.imei}",
                                 "client_name": "${screen.CLIENT_DATA.form.full_name}",
                                 "client_cpf": "${screen.CLIENT_DATA.form.cpf}",
                                 "client_email": "${screen.CLIENT_DATA.form.email}",
