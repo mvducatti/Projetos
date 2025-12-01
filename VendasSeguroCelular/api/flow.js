@@ -481,8 +481,17 @@ export default async function handler(req, res) {
       else if (screen === 'CLIENT_DATA') {
         console.log('👤 CLIENT_DATA - Validating client data');
         console.log('📊 Request data:', JSON.stringify(requestData));
+        console.log('🔍 Request data keys:', Object.keys(requestData));
         
         const { cpf, phone, full_name, email, birth_date } = requestData;
+        
+        console.log('🔎 Extracted values:', {
+          cpf: cpf || 'UNDEFINED',
+          phone: phone || 'UNDEFINED',
+          full_name: full_name || 'UNDEFINED',
+          email: email || 'UNDEFINED',
+          birth_date: birth_date || 'UNDEFINED'
+        });
         
         let cpf_error = '';
         let phone_error = '';
@@ -651,7 +660,7 @@ export default async function handler(req, res) {
         console.log('📋 ORDER_SUMMARY - Loading order data');
         console.log('📊 Request data:', JSON.stringify(requestData));
         
-        if (requestData.load_summary) {
+        if (requestData.load_order_summary) {
           const orderId = requestData.order_id;
           console.log('🔍 Looking for order_id:', orderId);
           
@@ -664,7 +673,6 @@ export default async function handler(req, res) {
               screen: 'ORDER_SUMMARY',
               data: {
                 order_id: orderId,
-                is_loaded: true,
                 ...orderSummary
               }
             });
@@ -674,7 +682,6 @@ export default async function handler(req, res) {
               screen: 'ORDER_SUMMARY',
               data: {
                 order_id: orderId,
-                is_loaded: true,
                 client_name: 'Erro ao carregar dados',
                 client_cpf: '',
                 client_email: '',

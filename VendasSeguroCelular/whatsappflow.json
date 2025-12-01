@@ -506,6 +506,21 @@
                         "text": "Resumo do Pedido"
                     },
                     {
+                        "type": "TextBody",
+                        "text": "Clique em 'Carregar Dados' para ver o resumo completo"
+                    },
+                    {
+                        "type": "EmbeddedLink",
+                        "text": "🔄 Carregar Dados",
+                        "on-click-action": {
+                            "name": "data_exchange",
+                            "payload": {
+                                "order_id": "${data.order_id}",
+                                "load_order_summary": true
+                            }
+                        }
+                    },
+                    {
                         "type": "TextSubheading",
                         "text": "Dados do Cliente"
                     },
