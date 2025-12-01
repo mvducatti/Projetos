@@ -847,18 +847,183 @@ export default async function handler(req) {
 
 ---
 
+## 🎨 Formatação de Texto em Terminal Screens
+
+### ✅ DESCOBERTA CRÍTICA: Terminal Screens e Variáveis Múltiplas
+
+**PROBLEMA:** Telas terminal (`"terminal": true`) NÃO processam corretamente múltiplas variáveis `${data.field}` em componentes TextBody separados.
+
+**CAUSA:** Terminal screens recebem dados apenas UMA VEZ na navegação e não suportam data_exchange posterior. O WhatsApp Flows não consegue interpolar múltiplas variáveis dinamicamente nessas telas.
+
+**SOLUÇÃO:** Enviar TODO o texto formatado em UMA ÚNICA variável!
+
+```json
+❌ NÃO FUNCIONA em Terminal Screens:
+{
+  "layout": {
+    "children": [
+      {
+        "type": "TextBody",
+        "text": "Nome: ${data.client_name}"
+      },
+      {
+        "type": "TextBody",
+        "text": "CPF: ${data.client_cpf}"
+      },
+      {
+        "type": "TextBody",
+        "text": "Email: ${data.client_email}"
+      }
+    ]
+  }
+}
+
+✅ FUNCIONA - Uma única variável com todo o texto:
+{
+  "data": {
+    "summary_text": {
+      "type": "string",
+      "__example__": "Nome: João Silva\nCPF: 123.456.789-00\nEmail: joao@email.com"
+    }
+  },
+  "layout": {
+    "children": [
+      {
+        "type": "TextBody",
+        "text": "${data.summary_text}"
+      }
+    ]
+  }
+}
+```
+
+### Backend - Construção do Texto Completo
+
+```javascript
+// Backend deve montar TODO o texto em UMA variável
+const summaryText = `*RESUMO DO PEDIDO*
+
+*DADOS DO CLIENTE*
+Nome: *${full_name}*
+CPF: ${formattedCpf}
+Email: ${formattedEmail}
+Telefone: ${formattedPhone}
+Data de Nascimento: ${birth_date}
+
+*DADOS DO APARELHO*
+Dispositivo: *${device.DeModel} - ${device.DeMemory}*
+
+*PLANO CONTRATADO*
+Plano: *${planNames[selectedPlan]}*
+Franquia: ${franchiseLabel}
+Forma de Cobrança: ${billingLabel}
+
+*VALOR FINAL*
+*${totalDisplay}*`;
+
+return sendEncryptedResponse({
+  screen: 'ORDER_SUMMARY',
+  data: {
+    order_id: flow_token,
+    summary_text: summaryText  // ✅ UMA única variável
+  }
+});
+```
+
+### Markdown Suportado
+
+WhatsApp Flows suporta formatação Markdown básica:
+
+```javascript
+// ✅ Negrito
+"*texto em negrito*"
+
+// ✅ Itálico
+"_texto em itálico_"
+
+// ✅ Riscado
+"~texto riscado~"
+
+// ✅ Monospace/Código
+"`código`"
+"```bloco de código```"
+
+// ✅ Quebra de linha
+"Linha 1\nLinha 2"
+
+// ✅ Combinações
+"*Negrito* com _itálico_ e `código`"
+```
+
+### Exemplo Prático
+
+```javascript
+// Backend formatado com Markdown
+const summaryText = `*🎉 PEDIDO CONFIRMADO*
+
+*Cliente:* ${full_name}
+_CPF:_ ${formattedCpf}
+_Email:_ ${formattedEmail}
+
+*📱 Aparelho*
+${device.model} - ${device.memory}
+~Preço original: R$ 5.000,00~
+*Valor do seguro:* R$ ${insurancePrice}
+
+\`Código do Pedido: ${orderId}\`
+
+_Você receberá um email com a apólice em até 24h._`;
+
+return {
+  screen: 'ORDER_SUMMARY',
+  data: {
+    summary_text: summaryText
+  }
+};
+```
+
+### Resultado Visual
+
+```
+🎉 PEDIDO CONFIRMADO
+
+Cliente: João Silva
+CPF: 123.456.789-00
+Email: joao@email.com
+
+📱 Aparelho
+iPhone 15 Pro - 256GB
+Preço original: R$ 5.000,00
+Valor do seguro: R$ 49.90
+
+Código do Pedido: ABC123XYZ
+
+Você receberá um email com a apólice em até 24h.
+```
+
+### ⚠️ Limitações
+
+1. **Emojis:** Funcionam, mas podem não renderizar em todos dispositivos
+2. **Links:** Use componente `EmbeddedLink` separado, não dentro do texto
+3. **Imagens:** Não suportadas em TextBody
+4. **Listas numeradas:** Use numeração manual (1. 2. 3.)
+5. **HTML:** Não suportado, apenas Markdown básico
+
+---
+
 ## 🎯 Resumo das Regras de Ouro
 
 1. **Variáveis NÃO funcionam em TextBody, TextHeading, TextCaption**
-2. **Use RadioButtonsGroup com data-source para exibir texto dinâmico**
-3. **Telas terminal precisam de data_exchange para carregar dados**
-4. **Sempre retorne campos de erro vazios mesmo quando não há erro**
-5. **Use Map/Database para persistir dados entre screens**
-6. **Logs detalhados são essenciais para debugging**
-7. **Valide no backend, não confie no frontend**
-8. **Formate dados antes de exibir (CPF, telefone, preço)**
-9. **`then` e `else` do If component são ARRAYS, não objects**
-10. **Prefira data_exchange com navegação a navigate simples quando precisar validar**
+2. **Terminal screens: UMA ÚNICA variável com TODO o texto formatado**
+3. **Use Markdown para formatar texto (*negrito*, _itálico_, ~riscado~, `código`)**
+4. **Use RadioButtonsGroup com data-source para exibir texto dinâmico em telas normais**
+5. **Sempre retorne campos de erro vazios mesmo quando não há erro**
+6. **Use Map/Database para persistir dados entre screens**
+7. **Logs detalhados são essenciais para debugging**
+8. **Valide no backend, não confie no frontend**
+9. **Formate dados antes de exibir (CPF, telefone, preço)**
+10. **`then` e `else` do If component são ARRAYS, não objects**
+11. **Prefira data_exchange com navegação a navigate simples quando precisar validar**
 
 ---
 

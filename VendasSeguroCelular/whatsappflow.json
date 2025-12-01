@@ -459,7 +459,7 @@
                 },
                 "summary_text": {
                     "type": "string",
-                    "__example__": "RESUMO DO PEDIDO\n\nDADOS DO CLIENTE\nNome: João Silva\nCPF: 123.456.789-00\nEmail: joao@email.com\nTelefone: (11) 98765-4321\nData de Nascimento: 01/01/1990\n\nDADOS DO APARELHO\nDispositivo: IPHONE 16 PRO - 128GB\n\nPLANO CONTRATADO\nPlano: COMPLETO\nFranquia: Franquia Normal\nForma de Cobrança: Pagamento mensal\n\nVALOR FINAL\nR$ 49,90"
+                    "__example__": "*RESUMO DO PEDIDO*\n\n*DADOS DO CLIENTE*\nNome: *João Silva*\nCPF: 123.456.789-00\nEmail: joao@email.com\nTelefone: (11) 98765-4321\nData de Nascimento: 01/01/1990\n\n*DADOS DO APARELHO*\nDispositivo: *IPHONE 16 PRO - 128GB*\n\n*PLANO CONTRATADO*\nPlano: *COMPLETO*\nFranquia: Franquia Normal\nForma de Cobrança: Pagamento mensal\n\n*VALOR FINAL*\n*R$ 49,90*"
                 }
             },
             "layout": {

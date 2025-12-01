@@ -662,25 +662,26 @@ export default async function handler(req, res) {
         // Navigate to ORDER_SUMMARY with all data
         // WhatsApp Flows TERMINAL SCREENS limitation: Must send ALL text as a SINGLE variable
         // Multiple ${data.field} variables don't work in terminal screens
-        const summaryText = `RESUMO DO PEDIDO
+        // Markdown formatting is supported: *bold*, _italic_, ~strikethrough~, ```code```
+        const summaryText = `*RESUMO DO PEDIDO*
 
-DADOS DO CLIENTE
-Nome: ${full_name}
+*DADOS DO CLIENTE*
+Nome: *${full_name}*
 CPF: ${formattedCpf}
 Email: ${formattedEmail}
 Telefone: ${formattedPhone}
 Data de Nascimento: ${birth_date}
 
-DADOS DO APARELHO
-Dispositivo: ${device.DeModel} - ${device.DeMemory}
+*DADOS DO APARELHO*
+Dispositivo: *${device.DeModel} - ${device.DeMemory}*
 
-PLANO CONTRATADO
-Plano: ${planNames[selectedPlan]}
+*PLANO CONTRATADO*
+Plano: *${planNames[selectedPlan]}*
 Franquia: ${franchiseLabel}
 Forma de Cobrança: ${billingLabel}
 
-VALOR FINAL
-${totalDisplay}`;
+*VALOR FINAL*
+*${totalDisplay}*`;
         
         const responseData = {
           screen: 'ORDER_SUMMARY',
