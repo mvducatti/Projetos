@@ -493,6 +493,22 @@ export default async function handler(req, res) {
           birth_date: birth_date || 'UNDEFINED'
         });
         
+        console.log('🔎 Type check:', {
+          cpf_type: typeof cpf,
+          phone_type: typeof phone,
+          full_name_type: typeof full_name,
+          email_type: typeof email,
+          birth_date_type: typeof birth_date
+        });
+        
+        console.log('🔎 Length check:', {
+          cpf_length: cpf ? cpf.length : 0,
+          phone_length: phone ? phone.length : 0,
+          full_name_length: full_name ? full_name.length : 0,
+          email_length: email ? email.length : 0,
+          birth_date_length: birth_date ? birth_date.length : 0
+        });
+        
         let cpf_error = '';
         let phone_error = '';
         let birth_date_error = '';
@@ -643,12 +659,21 @@ export default async function handler(req, res) {
         console.log('💾 Saved order data for flow_token:', flow_token);
         console.log('📋 Order summary:', orderSummary);
         
-        // Navigate to ORDER_SUMMARY with all data already loaded
+        // Navigate to ORDER_SUMMARY with all data
         const responseData = {
           screen: 'ORDER_SUMMARY',
           data: {
             order_id: flow_token,
-            ...orderSummary
+            client_name: full_name,
+            client_cpf: formattedCpf,
+            client_email: formattedEmail,
+            client_phone: formattedPhone,
+            client_birth_date: birth_date,
+            device: `${device.DeModel} - ${device.DeMemory}`,
+            plan_name: planNames[selectedPlan],
+            franchise: franchiseLabel,
+            billing_type: billingLabel,
+            total: totalDisplay
           }
         };
         

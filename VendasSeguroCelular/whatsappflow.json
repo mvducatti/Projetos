@@ -506,21 +506,6 @@
                         "text": "Resumo do Pedido"
                     },
                     {
-                        "type": "TextBody",
-                        "text": "Clique em 'Carregar Dados' para ver o resumo completo"
-                    },
-                    {
-                        "type": "EmbeddedLink",
-                        "text": "🔄 Carregar Dados",
-                        "on-click-action": {
-                            "name": "data_exchange",
-                            "payload": {
-                                "order_id": "${data.order_id}",
-                                "load_order_summary": true
-                            }
-                        }
-                    },
-                    {
                         "type": "TextSubheading",
                         "text": "Dados do Cliente"
                     },
@@ -534,7 +519,7 @@
                     },
                     {
                         "type": "TextBody",
-                        "text": "E-mail: ${data.client_email}"
+                        "text": "Email: ${data.client_email}"
                     },
                     {
                         "type": "TextBody",
@@ -546,39 +531,35 @@
                     },
                     {
                         "type": "TextSubheading",
-                        "text": "Aparelho"
+                        "text": "Dados do Aparelho"
                     },
                     {
                         "type": "TextBody",
-                        "text": "${data.device}"
+                        "text": "Dispositivo: ${data.device}"
                     },
                     {
                         "type": "TextSubheading",
-                        "text": "Plano Selecionado"
+                        "text": "Plano Contratado"
                     },
                     {
                         "type": "TextBody",
-                        "text": "${data.plan_name}"
+                        "text": "Plano: ${data.plan_name}"
                     },
                     {
                         "type": "TextBody",
-                        "text": "${data.franchise}"
+                        "text": "Franquia: ${data.franchise}"
                     },
                     {
                         "type": "TextBody",
-                        "text": "${data.billing_type}"
+                        "text": "Forma de Cobrança: ${data.billing_type}"
                     },
                     {
                         "type": "TextSubheading",
-                        "text": "Valor Total"
+                        "text": "Valor Final"
                     },
                     {
-                        "type": "TextHeading",
+                        "type": "TextBody",
                         "text": "${data.total}"
-                    },
-                    {
-                        "type": "TextCaption",
-                        "text": "- Cobertura imediata após pagamento\n- Cancelamento sem multa\n- Aparelho reserva em 24h"
                     },
                     {
                         "type": "Footer",
