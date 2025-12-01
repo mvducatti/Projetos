@@ -585,7 +585,7 @@ export default async function handler(req, res) {
         const annualPrice = basePrices[selectedPlan].anual * franchiseMultiplier;
         
         const finalPrice = billingType === 'mensal' ? monthlyPrice : annualPrice;
-        const billingLabel = billingType === 'mensal' ? 'Pagamento mensal' : 'Pagamento anual (11x sem juros)';
+        const billingLabel = billingType === 'mensal' ? 'Pagamento mensal' : 'Pagamento anual';
         const franchiseLabel = franchise === 'reduzida' ? 'Franquia Reduzida' : 'Franquia Normal';
         
         // Format total with payment type
@@ -605,6 +605,16 @@ export default async function handler(req, res) {
         const formattedEmail = email ? email.toLowerCase() : '';
         
         console.log('✅ Summary built for ORDER_SUMMARY');
+        console.log('\ud83d\udc64 Client data formatting:', {
+          full_name,
+          cpfClean,
+          formattedCpf,
+          email,
+          formattedEmail,
+          phoneClean,
+          formattedPhone,
+          birth_date
+        });
         
         // Save order data temporarily (in production, use database)
         const orderSummary = {
@@ -624,24 +634,19 @@ export default async function handler(req, res) {
         console.log('💾 Saved order data for flow_token:', flow_token);
         console.log('📋 Order summary:', orderSummary);
         
-        // Navigate to ORDER_SUMMARY with flow_token to retrieve data
-        return sendEncryptedResponse({
+        // Navigate to ORDER_SUMMARY with all data already loaded
+        const responseData = {
           screen: 'ORDER_SUMMARY',
           data: {
             order_id: flow_token,
-            is_loaded: false,
-            client_name: '',
-            client_cpf: '',
-            client_email: '',
-            client_phone: '',
-            client_birth_date: '',
-            device: '',
-            plan_name: '',
-            franchise: '',
-            billing_type: '',
-            total: ''
+            is_loaded: true,
+            ...orderSummary
           }
-        });
+        };
+        
+        console.log('📤 Sending to ORDER_SUMMARY:', JSON.stringify(responseData, null, 2));
+        
+        return sendEncryptedResponse(responseData);
       }
       else if (screen === 'ORDER_SUMMARY') {
         console.log('📋 ORDER_SUMMARY - Loading order data');
