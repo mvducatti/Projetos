@@ -300,12 +300,11 @@ export default async function handler(req, res) {
                   device_model: device.DeModel,
                   device_memory: device.DeMemory,
                   device_price: device.FormattedPrice,
-                  plans: [
+                  price_display: [
                     {
                       id: 'price',
                       title: 'Selecione as opções acima',
-                      description: 'O valor será calculado automaticamente',
-                      enabled: false
+                      description: 'O valor será calculado automaticamente'
                     }
                   ]
                 }
@@ -395,16 +394,16 @@ export default async function handler(req, res) {
           'completo': 'COMPLETO'
         };
         
-        let priceTitle, priceDescription;
+        let priceTitle, priceInstallments;
         
         if (billing_type === 'mensal') {
           const installments = Math.ceil(monthlyPrice);
           priceTitle = `Valor mensal: R$ ${monthlyPrice.toFixed(2)}`;
-          priceDescription = `${planNames[selected_plan]}\n\nEm até 11x sem juros de R$ ${installments.toFixed(2)}`;
+          priceInstallments = `Em até 11x sem juros de R$ ${installments.toFixed(2)}`;
         } else {
           const installments = Math.ceil(annualPrice / 11);
           priceTitle = `Valor anual: R$ ${annualPrice.toFixed(2)}`;
-          priceDescription = `${planNames[selected_plan]}\n\nEm até 11x sem juros de R$ ${installments.toFixed(2)}`;
+          priceInstallments = `Em até 11x sem juros de R$ ${installments.toFixed(2)}`;
         }
         
         return sendEncryptedResponse({
@@ -413,19 +412,18 @@ export default async function handler(req, res) {
             device_model: requestData.device_model || '',
             device_memory: requestData.device_memory || '',
             device_price: requestData.device_price || '',
-            plans: [
+            price_display: [
               {
                 id: 'price',
                 title: priceTitle,
-                description: priceDescription,
-                enabled: false
+                description: `${planNames[selected_plan]}\n\n${priceInstallments}`
               }
             ]
           }
         });
       }
       else if (screen === 'IMEI_VALIDATION') {
-        console.log('📱 IMEI_VALIDATION - Validating IMEI');
+        console.log('📱 IMEI_VALIDATION - Validating IMEI (TEST MODE - Only 15 digits check)');
         console.log('📊 Request data:', JSON.stringify(requestData));
         
         const imei = requestData.imei;
@@ -442,32 +440,32 @@ export default async function handler(req, res) {
         }
         
         // IMEI validation algorithm (Luhn algorithm for IMEI)
-        const validateIMEI = (imei) => {
-          let sum = 0;
-          for (let i = 0; i < 14; i++) {
-            let digit = parseInt(imei[i]);
-            if (i % 2 === 1) {
-              digit *= 2;
-              if (digit > 9) digit -= 9;
-            }
-            sum += digit;
-          }
-          const checkDigit = (10 - (sum % 10)) % 10;
-          return checkDigit === parseInt(imei[14]);
-        };
+        // const validateIMEI = (imei) => {
+        //   let sum = 0;
+        //   for (let i = 0; i < 14; i++) {
+        //     let digit = parseInt(imei[i]);
+        //     if (i % 2 === 1) {
+        //       digit *= 2;
+        //       if (digit > 9) digit -= 9;
+        //     }
+        //     sum += digit;
+        //   }
+        //   const checkDigit = (10 - (sum % 10)) % 10;
+        //   return checkDigit === parseInt(imei[14]);
+        // };
         
-        if (!validateIMEI(imei)) {
-          return sendEncryptedResponse({
-            screen: 'IMEI_VALIDATION',
-            data: {
-              imei_error: 'IMEI inválido. Verifique os números e tente novamente.',
-              is_validating: false
-            }
-          });
-        }
+        // if (!validateIMEI(imei)) {
+        //   return sendEncryptedResponse({
+        //     screen: 'IMEI_VALIDATION',
+        //     data: {
+        //       imei_error: 'IMEI inválido. Verifique os números e tente novamente.',
+        //       is_validating: false
+        //     }
+        //   });
+        // }
         
         // IMEI válido - navegar para próxima tela
-        console.log('✅ IMEI válido:', imei);
+        console.log('✅ IMEI aceito (test mode):', imei);
         return sendEncryptedResponse({
           screen: 'CLIENT_DATA',
           data: {}

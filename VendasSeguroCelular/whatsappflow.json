@@ -159,7 +159,7 @@
                     "type": "string",
                     "__example__": "R$ 7.999,00"
                 },
-                "plans": {
+                "price_display": {
                     "type": "array",
                     "items": {
                         "type": "object",
@@ -171,9 +171,9 @@
                     },
                     "__example__": [
                         {
-                            "id": "super_economico",
-                            "title": "SUPER ECONÔMICO - R$ 19,90/mês",
-                            "description": "R$ 215,00/ano\n\nProteção contra defeitos"
+                            "id": "price",
+                            "title": "Valor mensal: R$ 19,90",
+                            "description": "SUPER ECONÔMICO\n\nEm até 11x sem juros de R$ 20,00"
                         }
                     ]
                 }
@@ -184,10 +184,6 @@
                     {
                         "type": "TextHeading",
                         "text": "Escolha seu Plano"
-                    },
-                    {
-                        "type": "TextSubheading",
-                        "text": "Planos Disponíveis"
                     },
                     {
                         "type": "RadioButtonsGroup",
@@ -206,32 +202,24 @@
                             {
                                 "id": "super_economico",
                                 "title": "SUPER ECONÔMICO",
-                                "description": "Proteção contra defeitos"
+                                "description": "Danos Acidentais por Queda e Líquido"
                             },
                             {
                                 "id": "economico",
                                 "title": "ECONÔMICO",
-                                "description": "Roubo, furto e danos acidentais"
+                                "description": "Roubo, Furto Simples e Qualificado"
                             },
                             {
                                 "id": "completo",
                                 "title": "COMPLETO",
-                                "description": "Cobertura total SEM FRANQUIA + Aparelho reserva"
+                                "description": "Danos Acidentais por Queda e Líquido\nRoubo, Furto Simples e Qualificado"
                             }
                         ]
                     },
                     {
-                        "type": "TextSubheading",
-                        "text": "Franquia"
-                    },
-                    {
-                        "type": "TextCaption",
-                        "text": "Franquia é o valor pago pelo segurado em caso de danos, furto ou roubo antes da cobertura da seguradora."
-                    },
-                    {
                         "type": "RadioButtonsGroup",
                         "name": "franchise",
-                        "label": "Escolha a franquia",
+                        "label": "Escolha a franquia *",
                         "required": true,
                         "on-select-action": {
                             "name": "data_exchange",
@@ -253,8 +241,8 @@
                         ]
                     },
                     {
-                        "type": "TextSubheading",
-                        "text": "Forma de Cobrança"
+                        "type": "TextCaption",
+                        "text": "*Valor pago pelo segurado em caso de danos, furto ou roubo antes da cobertura da seguradora."
                     },
                     {
                         "type": "RadioButtonsGroup",
@@ -288,14 +276,15 @@
                     },
                     {
                         "type": "TextSubheading",
-                        "text": "Valor Final"
+                        "text": "💰 Valor Final"
                     },
                     {
                         "type": "RadioButtonsGroup",
-                        "name": "price_display",
-                        "label": "Resumo do valor",
+                        "name": "price_summary",
+                        "label": "Resumo do Valor",
                         "required": false,
-                        "data-source": "${data.plans}"
+                        "data-source": "${data.price_display}",
+                        "init-value": "price"
                     },
                     {
                         "type": "Footer",
@@ -334,19 +323,19 @@
                     },
                     {
                         "type": "TextBody",
-                        "text": "Digite o IMEI do seu aparelho para validação. O IMEI deve conter 15 dígitos numéricos."
+                        "text": "Digite o IMEI do seu aparelho para validação."
                     },
-                    {
+                     {
                         "type": "TextCaption",
                         "text": "Para encontrar o IMEI: disque *#06# no seu celular ou veja na caixa do aparelho."
                     },
                     {
                         "type": "TextInput",
                         "name": "imei",
-                        "label": "IMEI (15 dígitos)",
+                        "label": "IMEI",
                         "input-type": "number",
                         "required": true,
-                        "helper-text": "Digite apenas números",
+                        "helper-text": "Digite apenas 15 números",
                         "error-message": "${data.imei_error}"
                     },
                     {
