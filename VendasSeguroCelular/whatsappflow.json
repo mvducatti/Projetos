@@ -1,0 +1,345 @@
+{
+    "version": "7.2",
+    "data_api_version": "3.0",
+    "routing_model": {
+        "DEVICE_SELECTION": [
+            "PLAN_SELECTION"
+        ],
+        "PLAN_SELECTION": [
+            "CLIENT_DATA"
+        ],
+        "CLIENT_DATA": [
+            "ORDER_SUMMARY"
+        ],
+        "ORDER_SUMMARY": [
+            "SUCCESS"
+        ]
+    },
+    "screens": [
+        {
+            "id": "DEVICE_SELECTION",
+            "title": "Dados do Aparelho",
+            "data": {
+                "brands": {
+                    "type": "array",
+                    "__example__": [
+                        {"id": "APPLE", "title": "Apple"},
+                        {"id": "SAMSUNG", "title": "Samsung"}
+                    ]
+                },
+                "models": {
+                    "type": "array",
+                    "__example__": []
+                },
+                "memories": {
+                    "type": "array",
+                    "__example__": []
+                },
+                "selected_brand": {
+                    "type": "string",
+                    "__example__": ""
+                },
+                "selected_model": {
+                    "type": "string",
+                    "__example__": ""
+                },
+                "selected_memory": {
+                    "type": "string",
+                    "__example__": ""
+                },
+                "device_id": {
+                    "type": "string",
+                    "__example__": ""
+                }
+            },
+            "layout": {
+                "type": "SingleColumnLayout",
+                "children": [
+                    {
+                        "type": "TextHeading",
+                        "text": "Seguro do Celular"
+                    },
+                    {
+                        "type": "TextBody",
+                        "text": "Informe os dados do celular que deseja segurar:"
+                    },
+                    {
+                        "type": "Dropdown",
+                        "name": "brand",
+                        "label": "Marca do Celular",
+                        "required": true,
+                        "data-source": "${data.brands}",
+                        "on-select-action": {
+                            "name": "data_exchange",
+                            "payload": {
+                                "selected_brand": "${form.brand}"
+                            }
+                        }
+                    },
+                    {
+                        "type": "Dropdown",
+                        "name": "model",
+                        "label": "Modelo",
+                        "required": true,
+                        "enabled": "${data.models.length > 0}",
+                        "data-source": "${data.models}",
+                        "on-select-action": {
+                            "name": "data_exchange",
+                            "payload": {
+                                "selected_brand": "${form.brand}",
+                                "selected_model": "${form.model}"
+                            }
+                        }
+                    },
+                    {
+                        "type": "Dropdown",
+                        "name": "memory",
+                        "label": "Memória",
+                        "required": true,
+                        "enabled": "${data.memories.length > 0}",
+                        "data-source": "${data.memories}",
+                        "on-select-action": {
+                            "name": "data_exchange",
+                            "payload": {
+                                "selected_brand": "${form.brand}",
+                                "selected_model": "${form.model}",
+                                "selected_memory": "${form.memory}"
+                            }
+                        }
+                    },
+                    {
+                        "type": "Footer",
+                        "label": "Continuar",
+                        "enabled": "${form.brand != '' && form.model != '' && form.memory != ''}",
+                        "on-click-action": {
+                            "name": "navigate",
+                            "next": {
+                                "type": "screen",
+                                "name": "PLAN_SELECTION"
+                            },
+                            "payload": {
+                                "device_id": "${data.device_id}",
+                                "brand": "${form.brand}",
+                                "model": "${form.model}",
+                                "memory": "${form.memory}"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "id": "PLAN_SELECTION",
+            "title": "Escolha seu Plano",
+            "data": {
+                "device_info": {
+                    "type": "object",
+                    "__example__": {
+                        "model": "IPHONE 16 PRO",
+                        "memory": "128GB",
+                        "price": "R$ 7.999,00"
+                    }
+                }
+            },
+            "layout": {
+                "type": "SingleColumnLayout",
+                "children": [
+                    {
+                        "type": "TextHeading",
+                        "text": "Escolha seu Plano"
+                    },
+                    {
+                        "type": "TextBody",
+                        "text": "Aparelho: ${data.device_info.model} - ${data.device_info.memory}"
+                    },
+                    {
+                        "type": "TextBody",
+                        "text": "Valor do aparelho: ${data.device_info.price}"
+                    },
+                    {
+                        "type": "RadioButtonsGroup",
+                        "name": "plan",
+                        "label": "Planos Disponíveis",
+                        "required": true,
+                        "data-source": [
+                            {
+                                "id": "super_economico",
+                                "title": "SUPER ECONÔMICO - R$ 19,90",
+                                "description": "PIX: R$ 18,90 (5% OFF)\nCartão: 3x R$ 6,97\n\nProteção contra defeitos"
+                            },
+                            {
+                                "id": "economico",
+                                "title": "ECONÔMICO - R$ 34,90",
+                                "description": "PIX: R$ 33,15 (5% OFF)\nCartão: 3x R$ 12,23\n\nRoubo, furto e danos acidentais"
+                            },
+                            {
+                                "id": "completo",
+                                "title": "COMPLETO - R$ 49,90",
+                                "description": "PIX: R$ 47,40 (5% OFF)\nCartão: 3x R$ 17,47\n\nCobertura total SEM FRANQUIA + Aparelho reserva"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "Footer",
+                        "label": "Continuar",
+                        "on-click-action": {
+                            "name": "navigate",
+                            "next": {
+                                "type": "screen",
+                                "name": "CLIENT_DATA"
+                            },
+                            "payload": {}
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "id": "CLIENT_DATA",
+            "title": "Dados do Cliente",
+            "data": {},
+            "layout": {
+                "type": "SingleColumnLayout",
+                "children": [
+                    {
+                        "type": "TextHeading",
+                        "text": "Dados do Cliente"
+                    },
+                    {
+                        "type": "TextBody",
+                        "text": "Preencha os dados básicos do segurado:"
+                    },
+                    {
+                        "type": "TextInput",
+                        "name": "full_name",
+                        "label": "Nome Completo",
+                        "input-type": "text",
+                        "required": true,
+                        "helper-text": "Nome conforme documento"
+                    },
+                    {
+                        "type": "TextInput",
+                        "name": "cpf",
+                        "label": "CPF",
+                        "input-type": "text",
+                        "required": true,
+                        "helper-text": "Digite apenas números"
+                    },
+                    {
+                        "type": "TextInput",
+                        "name": "email",
+                        "label": "E-mail",
+                        "input-type": "email",
+                        "required": true,
+                        "helper-text": "Para envio da apólice"
+                    },
+                    {
+                        "type": "TextInput",
+                        "name": "phone",
+                        "label": "Telefone",
+                        "input-type": "phone",
+                        "required": true,
+                        "helper-text": "Digite com DDD"
+                    },
+                    {
+                        "type": "DatePicker",
+                        "name": "birth_date",
+                        "label": "Data de Nascimento",
+                        "required": true
+                    },
+                    {
+                        "type": "Footer",
+                        "label": "Continuar",
+                        "on-click-action": {
+                            "name": "navigate",
+                            "next": {
+                                "type": "screen",
+                                "name": "ORDER_SUMMARY"
+                            },
+                            "payload": {}
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "id": "ORDER_SUMMARY",
+            "title": "Resumo do Pedido",
+            "data": {
+                "summary": {
+                    "type": "object",
+                    "__example__": {
+                        "device": "IPHONE 16 PRO - 128GB",
+                        "plan": "COMPLETO - R$ 49,90",
+                        "total": "R$ 49,90",
+                        "total_pix": "R$ 47,40"
+                    }
+                }
+            },
+            "layout": {
+                "type": "SingleColumnLayout",
+                "children": [
+                    {
+                        "type": "TextHeading",
+                        "text": "RESUMO DO PEDIDO"
+                    },
+                    {
+                        "type": "TextSubheading",
+                        "text": "Aparelho"
+                    },
+                    {
+                        "type": "TextBody",
+                        "text": "${data.summary.device}"
+                    },
+                    {
+                        "type": "TextSubheading",
+                        "text": "Plano Selecionado"
+                    },
+                    {
+                        "type": "TextBody",
+                        "text": "${data.summary.plan}"
+                    },
+                    {
+                        "type": "TextBody",
+                        "text": "─────────────────────────"
+                    },
+                    {
+                        "type": "TextSubheading",
+                        "text": "Total: ${data.summary.total}"
+                    },
+                    {
+                        "type": "TextBody",
+                        "text": "PIX com 5% desconto: ${data.summary.total_pix}"
+                    },
+                    {
+                        "type": "TextBody",
+                        "text": "3x sem juros no cartão"
+                    },
+                    {
+                        "type": "TextCaption",
+                        "text": "- Cobertura imediata após pagamento\n- Cancelamento sem multa\n- Aparelho reserva em 24h"
+                    },
+                    {
+                        "type": "Footer",
+                        "label": "Confirmar e Contratar",
+                        "on-click-action": {
+                            "name": "complete",
+                            "payload": {
+                                "brand": "${screen.DEVICE_SELECTION.form.brand}",
+                                "model": "${screen.DEVICE_SELECTION.form.model}",
+                                "memory": "${screen.DEVICE_SELECTION.form.memory}",
+                                "device_id": "${screen.DEVICE_SELECTION.data.device_id}",
+                                "plan": "${screen.PLAN_SELECTION.form.plan}",
+                                "client_name": "${screen.CLIENT_DATA.form.full_name}",
+                                "client_cpf": "${screen.CLIENT_DATA.form.cpf}",
+                                "client_email": "${screen.CLIENT_DATA.form.email}",
+                                "client_phone": "${screen.CLIENT_DATA.form.phone}",
+                                "client_birth_date": "${screen.CLIENT_DATA.form.birth_date}"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}
