@@ -10,9 +10,6 @@
         ],
         "CLIENT_DATA": [
             "ORDER_SUMMARY"
-        ],
-        "ORDER_SUMMARY": [
-            "SUCCESS"
         ]
     },
     "screens": [
@@ -22,6 +19,13 @@
             "data": {
                 "brands": {
                     "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {"type": "string"},
+                            "title": {"type": "string"}
+                        }
+                    },
                     "__example__": [
                         {"id": "APPLE", "title": "Apple"},
                         {"id": "SAMSUNG", "title": "Samsung"}
@@ -29,10 +33,24 @@
                 },
                 "models": {
                     "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {"type": "string"},
+                            "title": {"type": "string"}
+                        }
+                    },
                     "__example__": []
                 },
                 "memories": {
                     "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {"type": "string"},
+                            "title": {"type": "string"}
+                        }
+                    },
                     "__example__": []
                 },
                 "selected_brand": {
@@ -81,7 +99,6 @@
                         "name": "model",
                         "label": "Modelo",
                         "required": true,
-                        "enabled": "${data.models.length > 0}",
                         "data-source": "${data.models}",
                         "on-select-action": {
                             "name": "data_exchange",
@@ -96,7 +113,6 @@
                         "name": "memory",
                         "label": "Memória",
                         "required": true,
-                        "enabled": "${data.memories.length > 0}",
                         "data-source": "${data.memories}",
                         "on-select-action": {
                             "name": "data_exchange",
@@ -110,7 +126,6 @@
                     {
                         "type": "Footer",
                         "label": "Continuar",
-                        "enabled": "${form.brand != '' && form.model != '' && form.memory != ''}",
                         "on-click-action": {
                             "name": "navigate",
                             "next": {
@@ -265,9 +280,16 @@
         {
             "id": "ORDER_SUMMARY",
             "title": "Resumo do Pedido",
+            "terminal": true,
             "data": {
                 "summary": {
                     "type": "object",
+                    "properties": {
+                        "device": {"type": "string"},
+                        "plan": {"type": "string"},
+                        "total": {"type": "string"},
+                        "total_pix": {"type": "string"}
+                    },
                     "__example__": {
                         "device": "IPHONE 16 PRO - 128GB",
                         "plan": "COMPLETO - R$ 49,90",

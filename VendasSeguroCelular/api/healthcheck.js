@@ -78,9 +78,14 @@ export default function handler(req, res) {
 
   try {
     const body = req.body || {};
+    
+    // Log request for debugging
+    console.log('Health check request:', JSON.stringify(body));
 
     // Check if request is encrypted (from WhatsApp)
     if (body.encrypted_flow_data && body.encrypted_aes_key && body.initial_vector) {
+      console.log('Processing encrypted request');
+      
       // Decrypt the request
       const decryptedRequest = decryptRequest(
         body.encrypted_flow_data,
@@ -88,6 +93,7 @@ export default function handler(req, res) {
         body.initial_vector
       );
 
+      console.log('Decrypted request:', JSON.stringify(decryptedRequest));
       const { version, action } = decryptedRequest;
 
       // Validate health check request
@@ -131,9 +137,15 @@ export default function handler(req, res) {
       });
     }
 
+    // If no body or invalid format, return error with details
     return res.status(400).json({
       error: 'Invalid request',
-      message: 'Expected version 3.0 and action ping or encrypted request format'
+      message: 'Expected encrypted format (encrypted_flow_data, encrypted_aes_key, initial_vector) or plain format (version: "3.0", action: "ping")',
+      received: {
+        hasEncrypted: !!(body.encrypted_flow_data && body.encrypted_aes_key && body.initial_vector),
+        version: version || 'missing',
+        action: action || 'missing'
+      }
     });
 
   } catch (error) {

@@ -150,7 +150,17 @@ async function getDeviceDetails(deviceId) {
 }
 
 export default async function handler(req, res) {
+  const timestamp = new Date().toISOString();
+  console.log('\n\n========================================');
+  console.log('🔵 FLOW ENDPOINT CALLED at', timestamp);
+  console.log('========================================');
+  console.log('📍 URL:', req.url);
+  console.log('🔧 Method:', req.method);
+  console.log('📋 Headers:', JSON.stringify(req.headers, null, 2));
+  console.log('🌐 Query:', JSON.stringify(req.query || {}, null, 2));
+  
   if (req.method !== 'POST') {
+    console.log('❌ REJECTED: Invalid method:', req.method);
     return res.status(405).json({
       error: 'Method not allowed',
       message: 'Only POST requests are accepted'
@@ -159,15 +169,37 @@ export default async function handler(req, res) {
 
   try {
     const body = req.body || {};
+    console.log('📦 Body type:', typeof body);
+    console.log('📦 Body keys:', Object.keys(body));
+    console.log('📦 Full body (first 500 chars):', JSON.stringify(body).substring(0, 500));
 
     // Check if encrypted request
-    if (!body.encrypted_flow_data || !body.encrypted_aes_key || !body.initial_vector) {
+    const hasEncryptedData = !!body.encrypted_flow_data;
+    const hasEncryptedKey = !!body.encrypted_aes_key;
+    const hasIV = !!body.initial_vector;
+    
+    console.log('🔒 Encryption check:');
+    console.log('   - encrypted_flow_data:', hasEncryptedData);
+    console.log('   - encrypted_aes_key:', hasEncryptedKey);
+    console.log('   - initial_vector:', hasIV);
+    
+    if (!hasEncryptedData || !hasEncryptedKey || !hasIV) {
+      console.log('❌ REJECTED: Missing encrypted fields');
       return res.status(400).json({
         error: 'Invalid request',
-        message: 'Missing encrypted request fields'
+        message: 'Missing encrypted request fields',
+        details: {
+          hasEncryptedData,
+          hasEncryptedKey,
+          hasIV
+        }
       });
     }
 
+    console.log('🔐 Attempting decryption...');
+    console.log('   - PRIVATE_KEY exists:', !!PRIVATE_KEY);
+    console.log('   - PRIVATE_KEY length:', PRIVATE_KEY ? PRIVATE_KEY.length : 0);
+    
     // Decrypt request
     const decryptedRequest = decryptRequest(
       body.encrypted_flow_data,
@@ -175,9 +207,14 @@ export default async function handler(req, res) {
       body.initial_vector
     );
 
+    console.log('✅ Decryption successful!');
+    console.log('📋 Decrypted request:', JSON.stringify(decryptedRequest, null, 2));
     const { version, action, screen, data: requestData } = decryptedRequest;
 
     let responseData = {};
+
+    console.log('📱 Processing screen:', screen);
+    console.log('📊 Request data:', JSON.stringify(requestData));
 
     // Handle different screens
     if (screen === 'DEVICE_SELECTION') {
@@ -294,15 +331,24 @@ export default async function handler(req, res) {
       Buffer.from(body.encrypted_aes_key, 'base64')
     );
 
+    console.log('📤 Sending response:', JSON.stringify(response));
+    
     const encryptedResponse = encryptResponse(response, decryptedAesKey, body.initial_vector);
 
+    console.log('✅ Response encrypted successfully');
     return res.status(200).send(encryptedResponse);
 
   } catch (error) {
-    console.error('Flow endpoint error:', error);
+    console.error('\n❌❌❌ CRITICAL ERROR ❌❌❌');
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
+    console.error('========================================\n');
+    
     return res.status(500).json({
       error: 'Internal server error',
-      message: error.message
+      message: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 }
