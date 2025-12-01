@@ -4,7 +4,7 @@
   ],
   "headers": [
     {
-      "source": "/images/(.*)",
+      "source": "/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
@@ -13,6 +13,10 @@
         {
           "key": "Access-Control-Allow-Origin",
           "value": "*"
+        },
+        {
+          "key": "Content-Type",
+          "value": "image/png"
         }
       ]
     }
