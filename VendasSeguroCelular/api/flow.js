@@ -395,14 +395,14 @@ export default async function handler(req, res) {
           'completo': 'COMPLETO'
         };
         
-        let priceTitle;
+        // UMA variável dinâmica que muda conforme a forma de cobrança
+        let dynamicText;
         
         if (billing_type === 'mensal') {
           const installments = Math.ceil(monthlyPrice);
-          priceTitle = `Valor mensal de R$ ${monthlyPrice.toFixed(2)}\n\nEm até 11x sem juros de R$ ${installments.toFixed(2)}`;
+          dynamicText = `Em até 11x sem juros de R$ ${installments.toFixed(2)}`;
         } else {
-          const installments = Math.ceil(annualPrice / 11);
-          priceTitle = `Valor mensal de R$ ${monthlyPrice.toFixed(2)}\n\nEm até 11x sem juros de R$ ${installments.toFixed(2)}`;
+          dynamicText = `Valor mensal de R$ ${monthlyPrice.toFixed(2)}`;
         }
         
         return sendEncryptedResponse({
@@ -415,7 +415,7 @@ export default async function handler(req, res) {
             price_display: [
               {
                 id: 'price',
-                title: priceTitle,
+                title: dynamicText,
                 description: planNames[selected_plan]
               }
             ]
