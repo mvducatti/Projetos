@@ -281,91 +281,55 @@ export default async function handler(req, res) {
 
       // Handle different screens
       if (screen === 'DEVICE_SELECTION') {
-        console.log('🔍 Checking what was selected:', {
-          brand: requestData.selected_brand,
-          model: requestData.selected_model,
-          memory: requestData.selected_memory
-        });
+        console.log('🔍 Received payload:', JSON.stringify(requestData, null, 2));
+        
+        try {
+          const brands = await getBrands();
+          console.log(`✅ Brands loaded: ${brands.length}`);
+          
+          let models = [];
+          let memories = [];
+          let device_id = '';
 
-        // Memory selected - set device ID and keep everything
-        if (requestData.selected_memory) {
-          console.log('💾 Memory selected:', requestData.selected_memory);
-          const brands = await getBrands();
-          const models = await getModels(requestData.selected_brand);
-          const memories = await getMemory(requestData.selected_model);
-          const selectedMemory = memories.find(m => m.id === requestData.selected_memory);
-          
+          // Se tem brand, carrega modelos
+          if (requestData.selected_brand) {
+            console.log('🏷️ Loading models for brand:', requestData.selected_brand);
+            models = await getModels(requestData.selected_brand);
+            console.log(`✅ Loaded ${models.length} models`);
+          }
+
+          // Se tem model, carrega memórias
+          if (requestData.selected_model) {
+            console.log('📱 Loading memories for model:', requestData.selected_model);
+            memories = await getMemory(requestData.selected_model);
+            console.log(`✅ Loaded ${memories.length} memories`);
+          }
+
+          // Se tem memory, busca device_id
+          if (requestData.selected_memory) {
+            console.log('💾 Looking for device_id with memory:', requestData.selected_memory);
+            const selectedMemory = memories.find(m => m.id === requestData.selected_memory);
+            device_id = selectedMemory ? selectedMemory.metadata.device_id.toString() : '';
+            console.log('✅ Device ID found:', device_id);
+          }
+
           responseData = {
             screen: 'DEVICE_SELECTION',
             data: {
               brands: brands,
               models: models,
               memories: memories,
-              selected_brand: requestData.selected_brand,
-              selected_model: requestData.selected_model,
-              selected_memory: requestData.selected_memory,
-              device_id: selectedMemory ? selectedMemory.metadata.device_id.toString() : ''
+              selected_brand: requestData.selected_brand || '',
+              selected_model: requestData.selected_model || '',
+              selected_memory: requestData.selected_memory || '',
+              device_id: device_id
             }
           };
-          console.log('✅ Device ID set:', responseData.data.device_id);
-        }
-        // Model selected - send memories and keep brands/models
-        else if (requestData.selected_model) {
-          console.log('📱 Model selected:', requestData.selected_model);
-          const brands = await getBrands();
-          const models = await getModels(requestData.selected_brand);
-          const memories = await getMemory(requestData.selected_model);
-          console.log(`✅ Found ${memories.length} memory options`);
           
-          responseData = {
-            screen: 'DEVICE_SELECTION',
-            data: {
-              brands: brands,
-              models: models,
-              memories: memories,
-              selected_brand: requestData.selected_brand,
-              selected_model: requestData.selected_model,
-              selected_memory: '',
-              device_id: ''
-            }
-          };
-        }
-        // Brand selected - send models and keep brands
-        else if (requestData.selected_brand) {
-          console.log('🏷️ Brand selected:', requestData.selected_brand);
-          const brands = await getBrands();
-          const models = await getModels(requestData.selected_brand);
-          console.log(`✅ Found ${models.length} models`);
-          
-          responseData = {
-            screen: 'DEVICE_SELECTION',
-            data: {
-              brands: brands,
-              models: models,
-              memories: [],
-              selected_brand: requestData.selected_brand,
-              selected_model: '',
-              selected_memory: '',
-              device_id: ''
-            }
-          };
-        }
-        // Fallback - resend brands
-        else {
-          console.log('⚠️ Fallback: resending brands');
-          const brands = await getBrands();
-          responseData = {
-            screen: 'DEVICE_SELECTION',
-            data: {
-              brands: brands,
-              models: [],
-              memories: [],
-              selected_brand: '',
-              selected_model: '',
-              selected_memory: '',
-              device_id: ''
-            }
-          };
+          console.log('📤 Response prepared successfully');
+        } catch (innerError) {
+          console.error('❌ Error processing DEVICE_SELECTION:', innerError.message);
+          throw innerError;
         }
       }
       else if (screen === 'PLAN_SELECTION') {
