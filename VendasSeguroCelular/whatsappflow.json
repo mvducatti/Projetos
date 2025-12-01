@@ -144,18 +144,17 @@
             "id": "PLAN_SELECTION",
             "title": "Escolha seu Plano",
             "data": {
-                "device_info": {
-                    "type": "object",
-                    "properties": {
-                        "model": {"type": "string"},
-                        "memory": {"type": "string"},
-                        "price": {"type": "string"}
-                    },
-                    "__example__": {
-                        "model": "IPHONE 16 PRO",
-                        "memory": "128GB",
-                        "price": "R$ 7.999,00"
-                    }
+                "device_model": {
+                    "type": "string",
+                    "__example__": "IPHONE 16 PRO"
+                },
+                "device_memory": {
+                    "type": "string",
+                    "__example__": "128GB"
+                },
+                "device_price": {
+                    "type": "string",
+                    "__example__": "R$ 7.999,00"
                 }
             },
             "layout": {
@@ -167,11 +166,11 @@
                     },
                     {
                         "type": "TextBody",
-                        "text": "Aparelho: ${data.device_info.model} - ${data.device_info.memory}"
+                        "text": "Aparelho: ${data.device_model} - ${data.device_memory}"
                     },
                     {
                         "type": "TextBody",
-                        "text": "Valor do aparelho: ${data.device_info.price}"
+                        "text": "Valor do aparelho: ${data.device_price}"
                     },
                     {
                         "type": "RadioButtonsGroup",

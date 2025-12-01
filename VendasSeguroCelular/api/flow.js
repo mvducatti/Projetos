@@ -291,11 +291,9 @@ export default async function handler(req, res) {
               return sendEncryptedResponse({
                 screen: 'PLAN_SELECTION',
                 data: {
-                  device_info: {
-                    model: device.DeModel,
-                    memory: device.DeMemory,
-                    price: device.FormattedPrice
-                  }
+                  device_model: device.DeModel,
+                  device_memory: device.DeMemory,
+                  device_price: device.FormattedPrice
                 }
               });
             } else {
