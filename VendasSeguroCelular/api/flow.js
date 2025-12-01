@@ -399,10 +399,10 @@ export default async function handler(req, res) {
         let dynamicText;
         
         if (billing_type === 'mensal') {
-          const installments = Math.ceil(monthlyPrice);
-          dynamicText = `Em até 11x sem juros de R$ ${installments.toFixed(2)}`;
+          dynamicText = `Mensalidade de R$ ${monthlyPrice.toFixed(2)}`;
         } else {
-          dynamicText = `Valor mensal de R$ ${monthlyPrice.toFixed(2)}`;
+          const installments = Math.ceil(annualPrice / 11);
+          dynamicText = `11x sem juros de R$ ${installments.toFixed(2)}`;
         }
         
         return sendEncryptedResponse({
