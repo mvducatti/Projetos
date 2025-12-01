@@ -77,7 +77,7 @@ export default function handler(req, res) {
   }
 
   try {
-    const body = req.body;
+    const body = req.body || {};
 
     // Check if request is encrypted (from WhatsApp)
     if (body.encrypted_flow_data && body.encrypted_aes_key && body.initial_vector) {

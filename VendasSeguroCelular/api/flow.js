@@ -158,7 +158,15 @@ export default async function handler(req, res) {
   }
 
   try {
-    const body = req.body;
+    const body = req.body || {};
+
+    // Check if encrypted request
+    if (!body.encrypted_flow_data || !body.encrypted_aes_key || !body.initial_vector) {
+      return res.status(400).json({
+        error: 'Invalid request',
+        message: 'Missing encrypted request fields'
+      });
+    }
 
     // Decrypt request
     const decryptedRequest = decryptRequest(
