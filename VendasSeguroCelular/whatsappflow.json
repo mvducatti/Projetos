@@ -159,9 +159,23 @@
                     "type": "string",
                     "__example__": "R$ 7.999,00"
                 },
-                "calculated_price": {
-                    "type": "string",
-                    "__example__": "R$ 49,90/mês"
+                "plans": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {"type": "string"},
+                            "title": {"type": "string"},
+                            "description": {"type": "string"}
+                        }
+                    },
+                    "__example__": [
+                        {
+                            "id": "super_economico",
+                            "title": "SUPER ECONÔMICO - R$ 19,90/mês",
+                            "description": "R$ 215,00/ano\n\nProteção contra defeitos"
+                        }
+                    ]
                 }
             },
             "layout": {
@@ -181,33 +195,6 @@
                     },
                     {
                         "type": "TextSubheading",
-                        "text": "Planos Disponíveis"
-                    },
-                    {
-                        "type": "RadioButtonsGroup",
-                        "name": "plan",
-                        "label": "Escolha o Plano",
-                        "required": true,
-                        "data-source": [
-                            {
-                                "id": "super_economico",
-                                "title": "SUPER ECONÔMICO",
-                                "description": "Proteção contra defeitos"
-                            },
-                            {
-                                "id": "economico",
-                                "title": "ECONÔMICO",
-                                "description": "Roubo, furto e danos acidentais"
-                            },
-                            {
-                                "id": "completo",
-                                "title": "COMPLETO",
-                                "description": "Cobertura total SEM FRANQUIA + Aparelho reserva"
-                            }
-                        ]
-                    },
-                    {
-                        "type": "TextSubheading",
                         "text": "Forma de Cobrança"
                     },
                     {
@@ -215,6 +202,13 @@
                         "name": "billing_type",
                         "label": "Escolha a forma de cobrança",
                         "required": true,
+                        "on-select-action": {
+                            "name": "data_exchange",
+                            "payload": {
+                                "billing_type": "${form.billing_type}",
+                                "franchise": "${form.franchise}"
+                            }
+                        },
                         "data-source": [
                             {
                                 "id": "anual",
@@ -241,6 +235,13 @@
                         "name": "franchise",
                         "label": "Escolha a franquia",
                         "required": true,
+                        "on-select-action": {
+                            "name": "data_exchange",
+                            "payload": {
+                                "billing_type": "${form.billing_type}",
+                                "franchise": "${form.franchise}"
+                            }
+                        },
                         "data-source": [
                             {
                                 "id": "normal",
@@ -253,12 +254,15 @@
                         ]
                     },
                     {
-                        "type": "TextBody",
-                        "text": "─────────────────────────"
+                        "type": "TextSubheading",
+                        "text": "Planos Disponíveis"
                     },
                     {
-                        "type": "TextHeading",
-                        "text": "${data.calculated_price}"
+                        "type": "RadioButtonsGroup",
+                        "name": "plan",
+                        "label": "Escolha o Plano",
+                        "required": true,
+                        "data-source": "${data.plans}"
                     },
                     {
                         "type": "Footer",
@@ -315,7 +319,6 @@
                     {
                         "type": "Footer",
                         "label": "Validar IMEI",
-                        "enabled": "`${form.imei}.length == 15`",
                         "on-click-action": {
                             "name": "data_exchange",
                             "payload": {

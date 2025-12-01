@@ -294,7 +294,23 @@ export default async function handler(req, res) {
                   device_model: device.DeModel,
                   device_memory: device.DeMemory,
                   device_price: device.FormattedPrice,
-                  calculated_price: 'Selecione as opções acima'
+                  plans: [
+                    {
+                      id: 'super_economico',
+                      title: 'SUPER ECONÔMICO - R$ 19,90/mês',
+                      description: 'R$ 215,00/ano\n\nProteção contra defeitos'
+                    },
+                    {
+                      id: 'economico',
+                      title: 'ECONÔMICO - R$ 34,90/mês',
+                      description: 'R$ 383,00/ano\n\nRoubo, furto e danos acidentais'
+                    },
+                    {
+                      id: 'completo',
+                      title: 'COMPLETO - R$ 49,90/mês',
+                      description: 'R$ 539,00/ano\n\nCobertura total SEM FRANQUIA + Aparelho reserva'
+                    }
+                  ]
                 }
               });
             } else {
@@ -355,36 +371,61 @@ export default async function handler(req, res) {
         }
       }
       else if (screen === 'PLAN_SELECTION') {
-        console.log('💰 PLAN_SELECTION - Calculating price');
+        console.log('💰 PLAN_SELECTION - Updating plans with dynamic pricing');
         console.log('📊 Request data:', JSON.stringify(requestData));
         
-        // Calculate price based on selections
-        if (requestData.plan && requestData.billing_type && requestData.franchise) {
-          const basePrices = {
-            'super_economico': { mensal: 19.90, anual: 215.00 },
-            'economico': { mensal: 34.90, anual: 383.00 },
-            'completo': { mensal: 49.90, anual: 539.00 }
+        // Calculate prices based on billing type and franchise
+        const billing_type = requestData.billing_type || 'mensal';
+        const franchise = requestData.franchise || 'normal';
+        
+        const basePrices = {
+          'super_economico': { mensal: 19.90, anual: 215.00 },
+          'economico': { mensal: 34.90, anual: 383.00 },
+          'completo': { mensal: 49.90, anual: 539.00 }
+        };
+        
+        const franchiseMultiplier = franchise === 'reduzida' ? 1.15 : 1.0;
+        
+        const plans = Object.keys(basePrices).map(planId => {
+          const monthlyPrice = basePrices[planId].mensal * franchiseMultiplier;
+          const annualPrice = basePrices[planId].anual * franchiseMultiplier;
+          
+          const planNames = {
+            'super_economico': 'SUPER ECONÔMICO',
+            'economico': 'ECONÔMICO',
+            'completo': 'COMPLETO'
           };
           
-          const franchiseMultiplier = requestData.franchise === 'reduzida' ? 1.15 : 1.0;
+          const planDescriptions = {
+            'super_economico': 'Proteção contra defeitos',
+            'economico': 'Roubo, furto e danos acidentais',
+            'completo': 'Cobertura total SEM FRANQUIA + Aparelho reserva'
+          };
           
-          const basePrice = basePrices[requestData.plan][requestData.billing_type];
-          const finalPrice = basePrice * franchiseMultiplier;
+          const priceDisplay = billing_type === 'mensal'
+            ? `R$ ${monthlyPrice.toFixed(2)}/mês`
+            : `R$ ${annualPrice.toFixed(2)}/ano`;
           
-          const priceText = requestData.billing_type === 'mensal' 
-            ? `R$ ${finalPrice.toFixed(2)}/mês`
-            : `R$ ${finalPrice.toFixed(2)}/ano`;
+          const priceAlt = billing_type === 'mensal'
+            ? `R$ ${annualPrice.toFixed(2)}/ano`
+            : `R$ ${monthlyPrice.toFixed(2)}/mês`;
           
-          return sendEncryptedResponse({
-            screen: 'PLAN_SELECTION',
-            data: {
-              device_model: requestData.device_model || '',
-              device_memory: requestData.device_memory || '',
-              device_price: requestData.device_price || '',
-              calculated_price: priceText
-            }
-          });
-        }
+          return {
+            id: planId,
+            title: `${planNames[planId]} - ${priceDisplay}`,
+            description: `${priceAlt}\n\n${planDescriptions[planId]}`
+          };
+        });
+        
+        return sendEncryptedResponse({
+          screen: 'PLAN_SELECTION',
+          data: {
+            device_model: requestData.device_model || '',
+            device_memory: requestData.device_memory || '',
+            device_price: requestData.device_price || '',
+            plans: plans
+          }
+        });
       }
       else if (screen === 'IMEI_VALIDATION') {
         console.log('📱 IMEI_VALIDATION - Validating IMEI');
