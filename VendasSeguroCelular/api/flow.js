@@ -302,19 +302,10 @@ export default async function handler(req, res) {
                   device_price: device.FormattedPrice,
                   plans: [
                     {
-                      id: 'super_economico',
-                      title: 'SUPER ECONÔMICO - R$ 19,90/mês',
-                      description: 'R$ 215,00/ano\n\nProteção contra defeitos'
-                    },
-                    {
-                      id: 'economico',
-                      title: 'ECONÔMICO - R$ 34,90/mês',
-                      description: 'R$ 383,00/ano\n\nRoubo, furto e danos acidentais'
-                    },
-                    {
-                      id: 'completo',
-                      title: 'COMPLETO - R$ 49,90/mês',
-                      description: 'R$ 539,00/ano\n\nCobertura total SEM FRANQUIA + Aparelho reserva'
+                      id: 'price',
+                      title: 'Selecione as opções acima',
+                      description: 'O valor será calculado automaticamente',
+                      enabled: false
                     }
                   ]
                 }
@@ -377,13 +368,15 @@ export default async function handler(req, res) {
         }
       }
       else if (screen === 'PLAN_SELECTION') {
-        console.log('💰 PLAN_SELECTION - Updating plans with dynamic pricing');
+        console.log('💰 PLAN_SELECTION - Updating price display');
         console.log('📊 Request data:', JSON.stringify(requestData));
         
-        // Calculate prices based on billing type and franchise
+        // Get selections
+        const selected_plan = requestData.selected_plan || 'super_economico';
         const billing_type = requestData.billing_type || 'mensal';
         const franchise = requestData.franchise || 'normal';
         
+        // Base prices
         const basePrices = {
           'super_economico': { mensal: 19.90, anual: 215.00 },
           'economico': { mensal: 34.90, anual: 383.00 },
@@ -392,36 +385,27 @@ export default async function handler(req, res) {
         
         const franchiseMultiplier = franchise === 'reduzida' ? 1.15 : 1.0;
         
-        const plans = Object.keys(basePrices).map(planId => {
-          const monthlyPrice = basePrices[planId].mensal * franchiseMultiplier;
-          const annualPrice = basePrices[planId].anual * franchiseMultiplier;
-          
-          const planNames = {
-            'super_economico': 'SUPER ECONÔMICO',
-            'economico': 'ECONÔMICO',
-            'completo': 'COMPLETO'
-          };
-          
-          const planDescriptions = {
-            'super_economico': 'Proteção contra defeitos',
-            'economico': 'Roubo, furto e danos acidentais',
-            'completo': 'Cobertura total SEM FRANQUIA + Aparelho reserva'
-          };
-          
-          const priceDisplay = billing_type === 'mensal'
-            ? `R$ ${monthlyPrice.toFixed(2)}/mês`
-            : `R$ ${annualPrice.toFixed(2)}/ano`;
-          
-          const priceAlt = billing_type === 'mensal'
-            ? `R$ ${annualPrice.toFixed(2)}/ano`
-            : `R$ ${monthlyPrice.toFixed(2)}/mês`;
-          
-          return {
-            id: planId,
-            title: `${planNames[planId]} - ${priceDisplay}`,
-            description: `${priceAlt}\n\n${planDescriptions[planId]}`
-          };
-        });
+        // Calculate price for selected plan
+        const monthlyPrice = basePrices[selected_plan].mensal * franchiseMultiplier;
+        const annualPrice = basePrices[selected_plan].anual * franchiseMultiplier;
+        
+        const planNames = {
+          'super_economico': 'SUPER ECONÔMICO',
+          'economico': 'ECONÔMICO',
+          'completo': 'COMPLETO'
+        };
+        
+        let priceTitle, priceDescription;
+        
+        if (billing_type === 'mensal') {
+          const installments = Math.ceil(monthlyPrice);
+          priceTitle = `Valor mensal: R$ ${monthlyPrice.toFixed(2)}`;
+          priceDescription = `${planNames[selected_plan]}\n\nEm até 11x sem juros de R$ ${installments.toFixed(2)}`;
+        } else {
+          const installments = Math.ceil(annualPrice / 11);
+          priceTitle = `Valor anual: R$ ${annualPrice.toFixed(2)}`;
+          priceDescription = `${planNames[selected_plan]}\n\nEm até 11x sem juros de R$ ${installments.toFixed(2)}`;
+        }
         
         return sendEncryptedResponse({
           screen: 'PLAN_SELECTION',
@@ -429,7 +413,14 @@ export default async function handler(req, res) {
             device_model: requestData.device_model || '',
             device_memory: requestData.device_memory || '',
             device_price: requestData.device_price || '',
-            plans: plans
+            plans: [
+              {
+                id: 'price',
+                title: priceTitle,
+                description: priceDescription,
+                enabled: false
+              }
+            ]
           }
         });
       }

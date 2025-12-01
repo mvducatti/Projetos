@@ -187,48 +187,36 @@
                     },
                     {
                         "type": "TextSubheading",
-                        "text": "📱 Aparelho Selecionado"
+                        "text": "Planos Disponíveis"
                     },
                     {
                         "type": "RadioButtonsGroup",
-                        "name": "device_info_display",
-                        "label": "Informações do Aparelho",
-                        "required": false,
-                        "data-source": [
-                            {
-                                "id": "device",
-                                "title": "${data.device_model}",
-                                "description": "Memória: ${data.device_memory}\nPreço: ${data.device_price}",
-                                "enabled": false
-                            }
-                        ]
-                    },
-                    {
-                        "type": "TextSubheading",
-                        "text": "Forma de Cobrança"
-                    },
-                    {
-                        "type": "RadioButtonsGroup",
-                        "name": "billing_type",
-                        "label": "Escolha a forma de cobrança",
+                        "name": "plan",
+                        "label": "Escolha o Plano",
                         "required": true,
                         "on-select-action": {
                             "name": "data_exchange",
                             "payload": {
-                                "billing_type": "${form.billing_type}",
-                                "franchise": "${form.franchise}"
+                                "selected_plan": "${form.plan}",
+                                "franchise": "${form.franchise}",
+                                "billing_type": "${form.billing_type}"
                             }
                         },
                         "data-source": [
                             {
-                                "id": "anual",
-                                "title": "Anual",
-                                "description": "Cobertura internacional\nAnálise, aprovação e proteção IMEDIATA\nAtendimento 24 horas"
+                                "id": "super_economico",
+                                "title": "SUPER ECONÔMICO",
+                                "description": "Proteção contra defeitos"
                             },
                             {
-                                "id": "mensal",
-                                "title": "Mensal",
-                                "description": "Não utiliza todo limite do seu cartão de crédito\nCobertura internacional\nAnálise, aprovação e proteção IMEDIATA\nAtendimento 24 horas"
+                                "id": "economico",
+                                "title": "ECONÔMICO",
+                                "description": "Roubo, furto e danos acidentais"
+                            },
+                            {
+                                "id": "completo",
+                                "title": "COMPLETO",
+                                "description": "Cobertura total SEM FRANQUIA + Aparelho reserva"
                             }
                         ]
                     },
@@ -248,8 +236,9 @@
                         "on-select-action": {
                             "name": "data_exchange",
                             "payload": {
-                                "billing_type": "${form.billing_type}",
-                                "franchise": "${form.franchise}"
+                                "selected_plan": "${form.plan}",
+                                "franchise": "${form.franchise}",
+                                "billing_type": "${form.billing_type}"
                             }
                         },
                         "data-source": [
@@ -259,19 +248,53 @@
                             },
                             {
                                 "id": "reduzida",
-                                "title": "Reduzida"
+                                "title": "Reduzida (+15%)"
                             }
                         ]
                     },
                     {
                         "type": "TextSubheading",
-                        "text": "Planos Disponíveis"
+                        "text": "Forma de Cobrança"
                     },
                     {
                         "type": "RadioButtonsGroup",
-                        "name": "plan",
-                        "label": "Escolha o Plano",
+                        "name": "billing_type",
+                        "label": "Escolha a forma de cobrança",
                         "required": true,
+                        "on-select-action": {
+                            "name": "data_exchange",
+                            "payload": {
+                                "selected_plan": "${form.plan}",
+                                "franchise": "${form.franchise}",
+                                "billing_type": "${form.billing_type}"
+                            }
+                        },
+                        "data-source": [
+                            {
+                                "id": "anual",
+                                "title": "Anual",
+                                "description": "Cobertura internacional\nAnálise, aprovação e proteção IMEDIATA\nAtendimento 24 horas"
+                            },
+                            {
+                                "id": "mensal",
+                                "title": "Mensal *",
+                                "description": "Cobertura internacional\nAnálise, aprovação e proteção IMEDIATA\nAtendimento 24 horas"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "TextCaption",
+                        "text": "*Não utiliza todo limite do seu cartão de crédito"
+                    },
+                    {
+                        "type": "TextSubheading",
+                        "text": "Valor Final"
+                    },
+                    {
+                        "type": "RadioButtonsGroup",
+                        "name": "price_display",
+                        "label": "Resumo do valor",
+                        "required": false,
                         "data-source": "${data.plans}"
                     },
                     {
