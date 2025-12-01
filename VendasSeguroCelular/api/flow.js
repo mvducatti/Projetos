@@ -125,12 +125,10 @@ async function getMemory(model) {
     return [];
   }
   
+  // WhatsApp Flow só aceita {id, title} - não pode ter campos extras!
   return data.data.map(item => ({
     id: item.IdObjectSmartphone.toString(),
-    title: item.DeMemory,
-    metadata: {
-      device_id: item.IdObjectSmartphone
-    }
+    title: item.DeMemory
   }));
 }
 
@@ -305,12 +303,11 @@ export default async function handler(req, res) {
             console.log(`✅ Loaded ${memories.length} memories`);
           }
 
-          // Se tem memory, busca device_id
+          // Se tem memory, o device_id é o próprio ID da memória selecionada
           if (requestData.selected_memory) {
-            console.log('💾 Looking for device_id with memory:', requestData.selected_memory);
-            const selectedMemory = memories.find(m => m.id === requestData.selected_memory);
-            device_id = selectedMemory ? selectedMemory.metadata.device_id.toString() : '';
-            console.log('✅ Device ID found:', device_id);
+            console.log('💾 Memory selected with ID:', requestData.selected_memory);
+            device_id = requestData.selected_memory;
+            console.log('✅ Device ID set to:', device_id);
           }
 
           responseData = {
