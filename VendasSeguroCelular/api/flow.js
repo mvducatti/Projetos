@@ -211,6 +211,20 @@ export default async function handler(req, res) {
     console.log('📋 Decrypted request:', JSON.stringify(decryptedRequest, null, 2));
     const { version, action, screen, data: requestData } = decryptedRequest;
 
+    // Handle health check (ping) request
+    if (action === 'ping') {
+      console.log('🏥 Health check request detected');
+      const healthResponse = {
+        data: {
+          status: 'active'
+        }
+      };
+      
+      const encryptedHealthResponse = encryptResponse(healthResponse, decryptedAesKey, body.initial_vector);
+      console.log('✅ Health check response sent');
+      return res.status(200).send(encryptedHealthResponse);
+    }
+
     let responseData = {};
 
     console.log('📱 Processing screen:', screen);
