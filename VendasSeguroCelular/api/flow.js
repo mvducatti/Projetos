@@ -211,6 +211,16 @@ export default async function handler(req, res) {
     console.log('📋 Decrypted request:', JSON.stringify(decryptedRequest, null, 2));
     const { version, action, screen, data: requestData } = decryptedRequest;
 
+    // Decrypt AES key for response encryption
+    const decryptedAesKey = crypto.privateDecrypt(
+      {
+        key: PRIVATE_KEY,
+        oaepHash: 'sha256',
+        padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+      },
+      Buffer.from(body.encrypted_aes_key, 'base64')
+    );
+
     // Handle health check (ping) request
     if (action === 'ping') {
       console.log('🏥 Health check request detected');
@@ -334,16 +344,6 @@ export default async function handler(req, res) {
       screen: screen,
       data: responseData
     };
-
-    // Encrypt response
-    const decryptedAesKey = crypto.privateDecrypt(
-      {
-        key: PRIVATE_KEY,
-        oaepHash: 'sha256',
-        padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
-      },
-      Buffer.from(body.encrypted_aes_key, 'base64')
-    );
 
     console.log('📤 Sending response:', JSON.stringify(response));
     
