@@ -209,7 +209,7 @@ export default async function handler(req, res) {
 
     console.log('✅ Decryption successful!');
     console.log('📋 Decrypted request:', JSON.stringify(decryptedRequest, null, 2));
-    const { version, action, screen, data: requestData } = decryptedRequest;
+    const { version, action, screen, data: requestData, flow_token } = decryptedRequest;
 
     // Decrypt AES key for response encryption
     const decryptedAesKey = crypto.privateDecrypt(
@@ -235,17 +235,27 @@ export default async function handler(req, res) {
       return res.status(200).send(encryptedHealthResponse);
     }
 
-    let responseData = {};
+    // Handle error notification from client
+    if (requestData?.error) {
+      console.warn('⚠️ Client error received:', requestData.error);
+      const errorAck = {
+        data: {
+          acknowledged: true
+        }
+      };
+      const encryptedAck = encryptResponse(errorAck, decryptedAesKey, body.initial_vector);
+      console.log('✅ Error acknowledgment sent');
+      return res.status(200).send(encryptedAck);
+    }
 
-    console.log('📱 Processing screen:', screen);
-    console.log('📊 Request data:', JSON.stringify(requestData));
-
-    // Handle different screens
-    if (screen === 'DEVICE_SELECTION') {
-      // Initial load - send brands
-      if (!requestData.selected_brand) {
-        const brands = await getBrands();
-        responseData = {
+    // Handle INIT action (when user opens the flow)
+    if (action === 'INIT') {
+      console.log('🚀 INIT action - Loading first screen');
+      const brands = await getBrands();
+      
+      const initResponse = {
+        screen: 'DEVICE_SELECTION',
+        data: {
           brands: brands,
           models: [],
           memories: [],
@@ -253,104 +263,134 @@ export default async function handler(req, res) {
           selected_model: '',
           selected_memory: '',
           device_id: ''
-        };
-      }
-      // Brand selected - send models
-      else if (requestData.selected_brand && !requestData.selected_model) {
-        const models = await getModels(requestData.selected_brand);
-        responseData = {
-          brands: await getBrands(),
-          models: models,
-          memories: [],
-          selected_brand: requestData.selected_brand,
-          selected_model: '',
-          selected_memory: '',
-          device_id: ''
-        };
-      }
-      // Model selected - send memories
-      else if (requestData.selected_model && !requestData.selected_memory) {
-        const memories = await getMemory(requestData.selected_model);
-        responseData = {
-          brands: await getBrands(),
-          models: await getModels(requestData.selected_brand),
-          memories: memories,
-          selected_brand: requestData.selected_brand,
-          selected_model: requestData.selected_model,
-          selected_memory: '',
-          device_id: ''
-        };
-      }
-      // Memory selected - set device ID
-      else if (requestData.selected_memory) {
-        const memories = await getMemory(requestData.selected_model);
-        const selectedMemory = memories.find(m => m.id === requestData.selected_memory);
-        
-        responseData = {
-          brands: await getBrands(),
-          models: await getModels(requestData.selected_brand),
-          memories: memories,
-          selected_brand: requestData.selected_brand,
-          selected_model: requestData.selected_model,
-          selected_memory: requestData.selected_memory,
-          device_id: selectedMemory ? selectedMemory.metadata.device_id.toString() : ''
-        };
-      }
+        }
+      };
+      
+      console.log('📤 INIT response:', JSON.stringify(initResponse));
+      const encryptedInitResponse = encryptResponse(initResponse, decryptedAesKey, body.initial_vector);
+      console.log('✅ INIT response encrypted and sent');
+      return res.status(200).send(encryptedInitResponse);
     }
-    else if (screen === 'PLAN_SELECTION') {
-      // Get device details for display
-      const deviceId = requestData.device_id || decryptedRequest.flow_token;
-      if (deviceId) {
-        const device = await getDeviceDetails(deviceId);
-        if (device) {
+
+    // Handle data_exchange action
+    if (action === 'data_exchange') {
+      let responseData = {};
+
+      console.log('🔄 DATA EXCHANGE - Screen:', screen);
+      console.log('📊 Request data:', JSON.stringify(requestData));
+
+      // Handle different screens
+      if (screen === 'DEVICE_SELECTION') {
+        // Brand selected - send models
+        if (requestData.selected_brand && !requestData.selected_model) {
+          const models = await getModels(requestData.selected_brand);
           responseData = {
-            device_info: {
-              model: device.DeModel,
-              memory: device.DeMemory,
-              price: device.FormattedPrice
+            screen: 'DEVICE_SELECTION',
+            data: {
+              models: models,
+              memories: []
+            }
+          };
+        }
+        // Model selected - send memories
+        else if (requestData.selected_model && !requestData.selected_memory) {
+          const memories = await getMemory(requestData.selected_model);
+          responseData = {
+            screen: 'DEVICE_SELECTION',
+            data: {
+              memories: memories
+            }
+          };
+        }
+        // Memory selected - set device ID
+        else if (requestData.selected_memory) {
+          const memories = await getMemory(requestData.selected_model);
+          const selectedMemory = memories.find(m => m.id === requestData.selected_memory);
+          
+          responseData = {
+            screen: 'DEVICE_SELECTION',
+            data: {
+              device_id: selectedMemory ? selectedMemory.metadata.device_id.toString() : ''
+            }
+          };
+        }
+        // Fallback - resend brands
+        else {
+          const brands = await getBrands();
+          responseData = {
+            screen: 'DEVICE_SELECTION',
+            data: {
+              brands: brands,
+              models: [],
+              memories: []
             }
           };
         }
       }
-    }
-    else if (screen === 'ORDER_SUMMARY') {
-      // Build summary
-      const deviceId = requestData.device_id;
-      const plan = requestData.plan;
-      
-      if (deviceId) {
-        const device = await getDeviceDetails(deviceId);
-        
-        const planPrices = {
-          'super_economico': { value: 19.90, pix: 18.90 },
-          'economico': { value: 34.90, pix: 33.15 },
-          'completo': { value: 49.90, pix: 47.40 }
-        };
-        
-        const selectedPlan = planPrices[plan] || planPrices.completo;
-        
-        responseData = {
-          summary: {
-            device: `${device.DeModel} - ${device.DeMemory}`,
-            plan: `${plan.toUpperCase()} - R$ ${selectedPlan.value.toFixed(2)}`,
-            total: `R$ ${selectedPlan.value.toFixed(2)}`,
-            total_pix: `R$ ${selectedPlan.pix.toFixed(2)}`
+      else if (screen === 'PLAN_SELECTION') {
+        // Get device details for display
+        const deviceId = requestData.device_id || flow_token;
+        if (deviceId) {
+          const device = await getDeviceDetails(deviceId);
+          if (device) {
+            responseData = {
+              screen: 'PLAN_SELECTION',
+              data: {
+                device_info: {
+                  model: device.DeModel,
+                  memory: device.DeMemory,
+                  price: device.FormattedPrice
+                }
+              }
+            };
           }
-        };
+        }
       }
+      else if (screen === 'ORDER_SUMMARY') {
+        // Build summary
+        const deviceId = requestData.device_id;
+        const plan = requestData.plan;
+        
+        if (deviceId) {
+          const device = await getDeviceDetails(deviceId);
+          
+          const planPrices = {
+            'super_economico': { value: 19.90, pix: 18.90 },
+            'economico': { value: 34.90, pix: 33.15 },
+            'completo': { value: 49.90, pix: 47.40 }
+          };
+          
+          const selectedPlan = planPrices[plan] || planPrices.completo;
+          
+          responseData = {
+            screen: 'ORDER_SUMMARY',
+            data: {
+              summary: {
+                device: `${device.DeModel} - ${device.DeMemory}`,
+                plan: `${plan.toUpperCase()} - R$ ${selectedPlan.value.toFixed(2)}`,
+                total: `R$ ${selectedPlan.value.toFixed(2)}`,
+                total_pix: `R$ ${selectedPlan.pix.toFixed(2)}`
+              }
+            }
+          };
+        }
+      }
+
+      console.log('📤 DATA EXCHANGE response:', JSON.stringify(responseData));
+      const encryptedResponse = encryptResponse(responseData, decryptedAesKey, body.initial_vector);
+      console.log('✅ Response encrypted successfully');
+      return res.status(200).send(encryptedResponse);
     }
 
-    const response = {
-      screen: screen,
-      data: responseData
+    // Unknown action
+    console.error('❌ Unknown action:', action);
+    const errorResponse = {
+      data: {
+        error_msg: 'Unknown action'
+      }
     };
-
-    console.log('📤 Sending response:', JSON.stringify(response));
-    
-    const encryptedResponse = encryptResponse(response, decryptedAesKey, body.initial_vector);
-
-    console.log('✅ Response encrypted successfully');
-    return res.status(200).send(encryptedResponse);
+    const encryptedError = encryptResponse(errorResponse, decryptedAesKey, body.initial_vector);
+    return res.status(400).send(encryptedError);
 
   } catch (error) {
     console.error('\n❌❌❌ CRITICAL ERROR ❌❌❌');
@@ -358,6 +398,12 @@ export default async function handler(req, res) {
     console.error('Error message:', error.message);
     console.error('Error stack:', error.stack);
     console.error('========================================\n');
+    
+    // If decryption fails, return 421 to refresh keys
+    if (error.message.includes('Decryption failed')) {
+      console.error('🔑 Decryption error - returning 421 to refresh keys');
+      return res.status(421).send();
+    }
     
     return res.status(500).json({
       error: 'Internal server error',
