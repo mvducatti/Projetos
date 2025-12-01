@@ -146,6 +146,11 @@
             "data": {
                 "device_info": {
                     "type": "object",
+                    "properties": {
+                        "model": {"type": "string"},
+                        "memory": {"type": "string"},
+                        "price": {"type": "string"}
+                    },
                     "__example__": {
                         "model": "IPHONE 16 PRO",
                         "memory": "128GB",

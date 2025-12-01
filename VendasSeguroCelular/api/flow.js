@@ -219,31 +219,32 @@ export default async function handler(req, res) {
       Buffer.from(body.encrypted_aes_key, 'base64')
     );
 
+    // Helper function to send encrypted response
+    const sendEncryptedResponse = (responseData) => {
+      console.log('📤 Response to encrypt:', JSON.stringify(responseData));
+      const encryptedResponse = encryptResponse(responseData, decryptedAesKey, body.initial_vector);
+      console.log('✅ Response encrypted and sent');
+      return res.status(200).send(encryptedResponse);
+    };
+
     // Handle health check (ping) request
     if (action === 'ping') {
       console.log('🏥 Health check request detected');
-      const healthResponse = {
+      return sendEncryptedResponse({
         data: {
           status: 'active'
         }
-      };
-      
-      const encryptedHealthResponse = encryptResponse(healthResponse, decryptedAesKey, body.initial_vector);
-      console.log('✅ Health check response sent');
-      return res.status(200).send(encryptedHealthResponse);
+      });
     }
 
     // Handle error notification from client
     if (requestData?.error) {
       console.warn('⚠️ Client error received:', requestData.error);
-      const errorAck = {
+      return sendEncryptedResponse({
         data: {
           acknowledged: true
         }
-      };
-      const encryptedAck = encryptResponse(errorAck, decryptedAesKey, body.initial_vector);
-      console.log('✅ Error acknowledgment sent');
-      return res.status(200).send(encryptedAck);
+      });
     }
 
     // Handle INIT action (when user opens the flow)
@@ -251,7 +252,7 @@ export default async function handler(req, res) {
       console.log('🚀 INIT action - Loading first screen');
       const brands = await getBrands();
       
-      const initResponse = {
+      return sendEncryptedResponse({
         screen: 'DEVICE_SELECTION',
         data: {
           brands: brands,
@@ -262,12 +263,7 @@ export default async function handler(req, res) {
           selected_memory: '',
           device_id: ''
         }
-      };
-      
-      console.log('📤 INIT response:', JSON.stringify(initResponse));
-      const encryptedInitResponse = encryptResponse(initResponse, decryptedAesKey, body.initial_vector);
-      console.log('✅ INIT response encrypted and sent');
-      return res.status(200).send(encryptedInitResponse);
+      });
     }
 
     // Handle data_exchange action
@@ -291,7 +287,8 @@ export default async function handler(req, res) {
             console.log('📱 Device details for PLAN_SELECTION:', device);
             
             if (device) {
-              responseData = {
+              // Return ONLY screen and data, WITHOUT navigate_to
+              return sendEncryptedResponse({
                 screen: 'PLAN_SELECTION',
                 data: {
                   device_info: {
@@ -300,8 +297,7 @@ export default async function handler(req, res) {
                     price: device.FormattedPrice
                   }
                 }
-              };
-              console.log('✅ PLAN_SELECTION response prepared:', JSON.stringify(responseData.data));
+              });
             } else {
               console.error('❌ Device not found for ID:', deviceId);
             }
@@ -341,7 +337,7 @@ export default async function handler(req, res) {
               console.log('✅ Device ID set to:', device_id);
             }
 
-            responseData = {
+            return sendEncryptedResponse({
               screen: 'DEVICE_SELECTION',
               data: {
                 brands: brands,
@@ -352,44 +348,11 @@ export default async function handler(req, res) {
                 selected_memory: requestData.selected_memory || '',
                 device_id: device_id
               }
-            };
-            
-            console.log('📤 Response prepared successfully');
+            });
           } catch (innerError) {
             console.error('❌ Error processing DEVICE_SELECTION:', innerError.message);
             throw innerError;
           }
-        }
-      }
-      else if (screen === 'PLAN_SELECTION') {
-        console.log('🎯 PLAN_SELECTION screen - Loading device details');
-        console.log('📊 Request data:', JSON.stringify(requestData));
-        
-        // Get device_id from navigation payload
-        const deviceId = requestData.device_id;
-        console.log('🔑 Device ID received:', deviceId);
-        
-        if (deviceId) {
-          const device = await getDeviceDetails(deviceId);
-          console.log('📱 Device details:', device);
-          
-          if (device) {
-            responseData = {
-              screen: 'PLAN_SELECTION',
-              data: {
-                device_info: {
-                  model: device.DeModel,
-                  memory: device.DeMemory,
-                  price: device.FormattedPrice
-                }
-              }
-            };
-            console.log('✅ PLAN_SELECTION response prepared:', JSON.stringify(responseData.data));
-          } else {
-            console.error('❌ Device not found for ID:', deviceId);
-          }
-        } else {
-          console.error('❌ No device_id in request data');
         }
       }
       else if (screen === 'ORDER_SUMMARY') {
@@ -408,7 +371,7 @@ export default async function handler(req, res) {
           
           const selectedPlan = planPrices[plan] || planPrices.completo;
           
-          responseData = {
+          return sendEncryptedResponse({
             screen: 'ORDER_SUMMARY',
             data: {
               summary: {
@@ -418,25 +381,20 @@ export default async function handler(req, res) {
                 total_pix: `R$ ${selectedPlan.pix.toFixed(2)}`
               }
             }
-          };
+          });
         }
       }
 
-      console.log('📤 DATA EXCHANGE response:', JSON.stringify(responseData));
-      const encryptedResponse = encryptResponse(responseData, decryptedAesKey, body.initial_vector);
-      console.log('✅ Response encrypted successfully');
-      return res.status(200).send(encryptedResponse);
+      throw new Error('Unhandled screen or missing data');
     }
 
     // Unknown action
     console.error('❌ Unknown action:', action);
-    const errorResponse = {
+    return sendEncryptedResponse({
       data: {
         error_msg: 'Unknown action'
       }
-    };
-    const encryptedError = encryptResponse(errorResponse, decryptedAesKey, body.initial_vector);
-    return res.status(400).send(encryptedError);
+    });
 
   } catch (error) {
     console.error('\n❌❌❌ CRITICAL ERROR ❌❌❌');
