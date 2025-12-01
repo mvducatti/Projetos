@@ -88,6 +88,20 @@
                         "text": "Informe os dados do celular que deseja segurar:"
                     },
                     {
+                        "type": "Image",
+                        "src": "https://whatsapp-flow-beige.vercel.app/api/image?name=undraw_confirmed_c5lo.png",
+                        "width": 200,
+                        "height": 200,
+                        "scale-type": "contain"
+                    },
+                    {
+                        "type": "Image",
+                        "src": "https://whatsapp-flow-beige.vercel.app/api/image?name=undraw_confirmed_c5lo.svg",
+                        "width": 200,
+                        "height": 200,
+                        "scale-type": "contain"
+                    },
+                    {
                         "type": "Dropdown",
                         "name": "brand",
                         "label": "Marca do Celular",
