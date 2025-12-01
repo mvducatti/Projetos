@@ -293,7 +293,8 @@ export default async function handler(req, res) {
                 data: {
                   device_model: device.DeModel,
                   device_memory: device.DeMemory,
-                  device_price: device.FormattedPrice
+                  device_price: device.FormattedPrice,
+                  calculated_price: 'Selecione as opções acima'
                 }
               });
             } else {
@@ -352,6 +353,87 @@ export default async function handler(req, res) {
             throw innerError;
           }
         }
+      }
+      else if (screen === 'PLAN_SELECTION') {
+        console.log('💰 PLAN_SELECTION - Calculating price');
+        console.log('📊 Request data:', JSON.stringify(requestData));
+        
+        // Calculate price based on selections
+        if (requestData.plan && requestData.billing_type && requestData.franchise) {
+          const basePrices = {
+            'super_economico': { mensal: 19.90, anual: 215.00 },
+            'economico': { mensal: 34.90, anual: 383.00 },
+            'completo': { mensal: 49.90, anual: 539.00 }
+          };
+          
+          const franchiseMultiplier = requestData.franchise === 'reduzida' ? 1.15 : 1.0;
+          
+          const basePrice = basePrices[requestData.plan][requestData.billing_type];
+          const finalPrice = basePrice * franchiseMultiplier;
+          
+          const priceText = requestData.billing_type === 'mensal' 
+            ? `R$ ${finalPrice.toFixed(2)}/mês`
+            : `R$ ${finalPrice.toFixed(2)}/ano`;
+          
+          return sendEncryptedResponse({
+            screen: 'PLAN_SELECTION',
+            data: {
+              device_model: requestData.device_model || '',
+              device_memory: requestData.device_memory || '',
+              device_price: requestData.device_price || '',
+              calculated_price: priceText
+            }
+          });
+        }
+      }
+      else if (screen === 'IMEI_VALIDATION') {
+        console.log('📱 IMEI_VALIDATION - Validating IMEI');
+        console.log('📊 Request data:', JSON.stringify(requestData));
+        
+        const imei = requestData.imei;
+        
+        // Validate IMEI format (15 digits)
+        if (!imei || !/^\d{15}$/.test(imei)) {
+          return sendEncryptedResponse({
+            screen: 'IMEI_VALIDATION',
+            data: {
+              imei_error: 'IMEI inválido. Deve conter exatamente 15 dígitos numéricos.',
+              is_validating: false
+            }
+          });
+        }
+        
+        // IMEI validation algorithm (Luhn algorithm for IMEI)
+        const validateIMEI = (imei) => {
+          let sum = 0;
+          for (let i = 0; i < 14; i++) {
+            let digit = parseInt(imei[i]);
+            if (i % 2 === 1) {
+              digit *= 2;
+              if (digit > 9) digit -= 9;
+            }
+            sum += digit;
+          }
+          const checkDigit = (10 - (sum % 10)) % 10;
+          return checkDigit === parseInt(imei[14]);
+        };
+        
+        if (!validateIMEI(imei)) {
+          return sendEncryptedResponse({
+            screen: 'IMEI_VALIDATION',
+            data: {
+              imei_error: 'IMEI inválido. Verifique os números e tente novamente.',
+              is_validating: false
+            }
+          });
+        }
+        
+        // IMEI válido - navegar para próxima tela
+        console.log('✅ IMEI válido:', imei);
+        return sendEncryptedResponse({
+          screen: 'CLIENT_DATA',
+          data: {}
+        });
       }
       else if (screen === 'ORDER_SUMMARY') {
         // Build summary

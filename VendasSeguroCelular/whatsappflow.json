@@ -6,6 +6,9 @@
             "PLAN_SELECTION"
         ],
         "PLAN_SELECTION": [
+            "IMEI_VALIDATION"
+        ],
+        "IMEI_VALIDATION": [
             "CLIENT_DATA"
         ],
         "CLIENT_DATA": [
@@ -155,6 +158,10 @@
                 "device_price": {
                     "type": "string",
                     "__example__": "R$ 7.999,00"
+                },
+                "calculated_price": {
+                    "type": "string",
+                    "__example__": "R$ 49,90/mês"
                 }
             },
             "layout": {
@@ -173,27 +180,85 @@
                         "text": "Valor do aparelho: ${data.device_price}"
                     },
                     {
+                        "type": "TextSubheading",
+                        "text": "Planos Disponíveis"
+                    },
+                    {
                         "type": "RadioButtonsGroup",
                         "name": "plan",
-                        "label": "Planos Disponíveis",
+                        "label": "Escolha o Plano",
                         "required": true,
                         "data-source": [
                             {
                                 "id": "super_economico",
-                                "title": "SUPER ECONÔMICO - R$ 19,90",
-                                "description": "PIX: R$ 18,90 (5% OFF)\nCartão: 3x R$ 6,97\n\nProteção contra defeitos"
+                                "title": "SUPER ECONÔMICO",
+                                "description": "Proteção contra defeitos"
                             },
                             {
                                 "id": "economico",
-                                "title": "ECONÔMICO - R$ 34,90",
-                                "description": "PIX: R$ 33,15 (5% OFF)\nCartão: 3x R$ 12,23\n\nRoubo, furto e danos acidentais"
+                                "title": "ECONÔMICO",
+                                "description": "Roubo, furto e danos acidentais"
                             },
                             {
                                 "id": "completo",
-                                "title": "COMPLETO - R$ 49,90",
-                                "description": "PIX: R$ 47,40 (5% OFF)\nCartão: 3x R$ 17,47\n\nCobertura total SEM FRANQUIA + Aparelho reserva"
+                                "title": "COMPLETO",
+                                "description": "Cobertura total SEM FRANQUIA + Aparelho reserva"
                             }
                         ]
+                    },
+                    {
+                        "type": "TextSubheading",
+                        "text": "Forma de Cobrança"
+                    },
+                    {
+                        "type": "RadioButtonsGroup",
+                        "name": "billing_type",
+                        "label": "Escolha a forma de cobrança",
+                        "required": true,
+                        "data-source": [
+                            {
+                                "id": "anual",
+                                "title": "Anual",
+                                "description": "Cobertura internacional\nAnálise, aprovação e proteção IMEDIATA\nAtendimento 24 horas"
+                            },
+                            {
+                                "id": "mensal",
+                                "title": "Mensal",
+                                "description": "Não utiliza todo limite do seu cartão de crédito\nCobertura internacional\nAnálise, aprovação e proteção IMEDIATA\nAtendimento 24 horas"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "TextSubheading",
+                        "text": "Franquia"
+                    },
+                    {
+                        "type": "TextCaption",
+                        "text": "Franquia é o valor pago pelo segurado em caso de danos, furto ou roubo antes da cobertura da seguradora."
+                    },
+                    {
+                        "type": "RadioButtonsGroup",
+                        "name": "franchise",
+                        "label": "Escolha a franquia",
+                        "required": true,
+                        "data-source": [
+                            {
+                                "id": "normal",
+                                "title": "Normal"
+                            },
+                            {
+                                "id": "reduzida",
+                                "title": "Reduzida"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "TextBody",
+                        "text": "─────────────────────────"
+                    },
+                    {
+                        "type": "TextHeading",
+                        "text": "${data.calculated_price}"
                     },
                     {
                         "type": "Footer",
@@ -202,9 +267,61 @@
                             "name": "navigate",
                             "next": {
                                 "type": "screen",
-                                "name": "CLIENT_DATA"
+                                "name": "IMEI_VALIDATION"
                             },
                             "payload": {}
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "id": "IMEI_VALIDATION",
+            "title": "Validação do IMEI",
+            "data": {
+                "imei_error": {
+                    "type": "string",
+                    "__example__": ""
+                },
+                "is_validating": {
+                    "type": "boolean",
+                    "__example__": false
+                }
+            },
+            "layout": {
+                "type": "SingleColumnLayout",
+                "children": [
+                    {
+                        "type": "TextHeading",
+                        "text": "Validação do IMEI"
+                    },
+                    {
+                        "type": "TextBody",
+                        "text": "Digite o IMEI do seu aparelho para validação. O IMEI deve conter 15 dígitos numéricos."
+                    },
+                    {
+                        "type": "TextCaption",
+                        "text": "Para encontrar o IMEI: disque *#06# no seu celular ou veja na caixa do aparelho."
+                    },
+                    {
+                        "type": "TextInput",
+                        "name": "imei",
+                        "label": "IMEI (15 dígitos)",
+                        "input-type": "number",
+                        "required": true,
+                        "helper-text": "Digite apenas números",
+                        "error-message": "${data.imei_error}"
+                    },
+                    {
+                        "type": "Footer",
+                        "label": "Validar IMEI",
+                        "enabled": "`${form.imei}.length == 15`",
+                        "on-click-action": {
+                            "name": "data_exchange",
+                            "payload": {
+                                "imei": "${form.imei}",
+                                "validate_imei": true
+                            }
                         }
                     }
                 ]
