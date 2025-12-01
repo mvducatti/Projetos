@@ -639,7 +639,6 @@ export default async function handler(req, res) {
           screen: 'ORDER_SUMMARY',
           data: {
             order_id: flow_token,
-            is_loaded: true,
             ...orderSummary
           }
         };
