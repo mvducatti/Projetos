@@ -330,10 +330,17 @@ export default async function handler(req, res) {
         }
       }
       else if (screen === 'PLAN_SELECTION') {
-        // Get device details for display
-        const deviceId = requestData.device_id || flow_token;
+        console.log('🎯 PLAN_SELECTION screen - Loading device details');
+        console.log('📊 Request data:', JSON.stringify(requestData));
+        
+        // Get device_id from navigation payload
+        const deviceId = requestData.device_id;
+        console.log('🔑 Device ID received:', deviceId);
+        
         if (deviceId) {
           const device = await getDeviceDetails(deviceId);
+          console.log('📱 Device details:', device);
+          
           if (device) {
             responseData = {
               screen: 'PLAN_SELECTION',
@@ -345,7 +352,12 @@ export default async function handler(req, res) {
                 }
               }
             };
+            console.log('✅ PLAN_SELECTION response prepared:', JSON.stringify(responseData.data));
+          } else {
+            console.error('❌ Device not found for ID:', deviceId);
           }
+        } else {
+          console.error('❌ No device_id in request data');
         }
       }
       else if (screen === 'ORDER_SUMMARY') {
