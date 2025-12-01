@@ -508,14 +508,14 @@
                     },
                     {
                         "type": "Image",
-                        "src": "https://whatsapp-flow-beige.vercel.app/undraw_confirmed_c5lo.png",
+                        "src": "https://whatsapp-flow-beige.vercel.app/api/image?name=undraw_confirmed_c5lo.png",
                         "width": 250,
                         "height": 250,
                         "scale-type": "contain"
                     },
                     {
                         "type": "Image",
-                        "src": "https://whatsapp-flow-beige.vercel.app/undraw_confirmed_c5lo.svg",
+                        "src": "https://whatsapp-flow-beige.vercel.app/api/image?name=undraw_confirmed_c5lo.svg",
                         "width": 250,
                         "height": 250,
                         "scale-type": "contain"
