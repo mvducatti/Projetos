@@ -468,6 +468,74 @@ export default async function handler(req, res) {
         console.log('✅ IMEI aceito (test mode):', imei);
         return sendEncryptedResponse({
           screen: 'CLIENT_DATA',
+          data: {
+            cpf_error: '',
+            phone_error: ''
+          }
+        });
+      }
+      else if (screen === 'CLIENT_DATA') {
+        console.log('👤 CLIENT_DATA - Validating client data');
+        console.log('📊 Request data:', JSON.stringify(requestData));
+        
+        const { cpf, phone, full_name, email, birth_date } = requestData;
+        
+        let cpf_error = '';
+        let phone_error = '';
+        
+        // Validate CPF (11 digits)
+        const cpfClean = cpf ? cpf.replace(/\D/g, '') : '';
+        if (!cpfClean || cpfClean.length !== 11) {
+          cpf_error = 'CPF inválido. Deve conter 11 dígitos.';
+        } else {
+          // Validate CPF checksum
+          const validateCPF = (cpf) => {
+            if (/^(\d)\1{10}$/.test(cpf)) return false; // All same digits
+            
+            let sum = 0;
+            for (let i = 0; i < 9; i++) {
+              sum += parseInt(cpf[i]) * (10 - i);
+            }
+            let digit1 = 11 - (sum % 11);
+            if (digit1 >= 10) digit1 = 0;
+            
+            sum = 0;
+            for (let i = 0; i < 10; i++) {
+              sum += parseInt(cpf[i]) * (11 - i);
+            }
+            let digit2 = 11 - (sum % 11);
+            if (digit2 >= 10) digit2 = 0;
+            
+            return digit1 === parseInt(cpf[9]) && digit2 === parseInt(cpf[10]);
+          };
+          
+          if (!validateCPF(cpfClean)) {
+            cpf_error = 'CPF inválido. Verifique os números digitados.';
+          }
+        }
+        
+        // Validate phone (10 or 11 digits)
+        const phoneClean = phone ? phone.replace(/\D/g, '') : '';
+        if (!phoneClean || (phoneClean.length !== 10 && phoneClean.length !== 11)) {
+          phone_error = 'Telefone inválido. Deve conter 10 ou 11 dígitos (DDD + número).';
+        }
+        
+        // If there are errors, return to CLIENT_DATA with error messages
+        if (cpf_error || phone_error) {
+          console.log('❌ Validation errors:', { cpf_error, phone_error });
+          return sendEncryptedResponse({
+            screen: 'CLIENT_DATA',
+            data: {
+              cpf_error: cpf_error,
+              phone_error: phone_error
+            }
+          });
+        }
+        
+        // All valid - navigate to ORDER_SUMMARY
+        console.log('✅ Client data validated successfully');
+        return sendEncryptedResponse({
+          screen: 'ORDER_SUMMARY',
           data: {}
         });
       }

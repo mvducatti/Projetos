@@ -286,7 +286,7 @@
                         "type": "RadioButtonsGroup",
                         "name": "price_summary",
                         "label": "Resumo do Valor",
-                        "required": false,
+                        "required": true,
                         "data-source": "${data.price_display}",
                         "init-value": "price"
                     },
@@ -359,7 +359,16 @@
         {
             "id": "CLIENT_DATA",
             "title": "Dados do Cliente",
-            "data": {},
+            "data": {
+                "cpf_error": {
+                    "type": "string",
+                    "__example__": ""
+                },
+                "phone_error": {
+                    "type": "string",
+                    "__example__": ""
+                }
+            },
             "layout": {
                 "type": "SingleColumnLayout",
                 "children": [
@@ -385,7 +394,8 @@
                         "label": "CPF",
                         "input-type": "text",
                         "required": true,
-                        "helper-text": "Digite apenas números"
+                        "helper-text": "Digite apenas números (11 dígitos)",
+                        "error-message": "${data.cpf_error}"
                     },
                     {
                         "type": "TextInput",
@@ -401,7 +411,8 @@
                         "label": "Telefone",
                         "input-type": "phone",
                         "required": true,
-                        "helper-text": "Digite com DDD"
+                        "helper-text": "Digite com DDD (11 dígitos)",
+                        "error-message": "${data.phone_error}"
                     },
                     {
                         "type": "DatePicker",
@@ -413,12 +424,15 @@
                         "type": "Footer",
                         "label": "Continuar",
                         "on-click-action": {
-                            "name": "navigate",
-                            "next": {
-                                "type": "screen",
-                                "name": "ORDER_SUMMARY"
-                            },
-                            "payload": {}
+                            "name": "data_exchange",
+                            "payload": {
+                                "full_name": "${form.full_name}",
+                                "cpf": "${form.cpf}",
+                                "email": "${form.email}",
+                                "phone": "${form.phone}",
+                                "birth_date": "${form.birth_date}",
+                                "validate_client_data": true
+                            }
                         }
                     }
                 ]
@@ -434,14 +448,12 @@
                     "properties": {
                         "device": {"type": "string"},
                         "plan": {"type": "string"},
-                        "total": {"type": "string"},
-                        "total_pix": {"type": "string"}
+                        "total": {"type": "string"}
                     },
                     "__example__": {
                         "device": "IPHONE 16 PRO - 128GB",
                         "plan": "COMPLETO - R$ 49,90",
-                        "total": "R$ 49,90",
-                        "total_pix": "R$ 47,40"
+                        "total": "R$ 49,90"
                     }
                 }
             },
@@ -450,7 +462,7 @@
                 "children": [
                     {
                         "type": "TextHeading",
-                        "text": "RESUMO DO PEDIDO"
+                        "text": "Resumo do Pedido"
                     },
                     {
                         "type": "TextSubheading",
@@ -469,20 +481,8 @@
                         "text": "${data.summary.plan}"
                     },
                     {
-                        "type": "TextBody",
-                        "text": "─────────────────────────"
-                    },
-                    {
                         "type": "TextSubheading",
                         "text": "Total: ${data.summary.total}"
-                    },
-                    {
-                        "type": "TextBody",
-                        "text": "PIX com 5% desconto: ${data.summary.total_pix}"
-                    },
-                    {
-                        "type": "TextBody",
-                        "text": "3x sem juros no cartão"
                     },
                     {
                         "type": "TextCaption",
