@@ -174,11 +174,8 @@ async function handleTextMessage(message, from, contactName) {
   const text = message.text?.body;
   console.log('💬 Text message:', text);
 
-  // TODO: Implement your business logic here
-  // Example: Save to database, trigger automation, send auto-reply, etc.
-
-  // Auto-reply example (you can remove this later)
-  // await sendTextMessage(from, `Olá ${contactName}! Recebi sua mensagem: "${text}"`);
+  // 🎉 RESPOSTA AUTOMÁTICA ATIVADA!
+  await sendTextMessage(from, `Oi! Você disse: "${text}" 😄`);
 }
 
 // ==========================================
