@@ -174,8 +174,20 @@ async function handleTextMessage(message, from, contactName) {
   const text = message.text?.body;
   console.log('💬 Text message:', text);
 
-  // 🎉 RESPOSTA AUTOMÁTICA ATIVADA!
-  await sendTextMessage(from, `Oi! Você disse: "${text}" 😄`);
+  // 🎉 RESPOSTA AUTOMÁTICA COM FLOW!
+  
+  // Se a mensagem for do Message Link ou contiver palavras-chave, envia o Flow
+  if (
+    text.toLowerCase().includes('quero proteger meu celular') ||
+    text.toLowerCase().includes('cotação') || 
+    text.toLowerCase().includes('seguro') || 
+    text.toLowerCase().includes('cotar')
+  ) {
+    await sendFlowTemplate(from);
+  } else {
+    // Senão, envia mensagem com instruções
+    await sendTextMessage(from, `Oi ${contactName}! 👋\n\nDigite *cotação* ou *seguro* para iniciar uma cotação!\n\nOu clique no link: https://wa.me/5511916270802?text=Quero%20proteger%20meu%20celular%20agora!`);
+  }
 }
 
 // ==========================================
@@ -285,10 +297,69 @@ async function sendTextMessage(to, text) {
     );
 
     const data = await response.json();
-    console.log('✅ Message sent:', data);
+    console.log('✅ Text message sent:', data);
     return data;
   } catch (error) {
     console.error('❌ Error sending message:', error);
+    throw error;
+  }
+}
+
+// ==========================================
+// SEND FLOW TEMPLATE (Helper function)
+// ==========================================
+async function sendFlowTemplate(to) {
+  const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
+  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+
+  // Gera um flow_token único para rastrear esta conversa
+  const flowToken = `FLOW_${Date.now()}_${to}`;
+
+  try {
+    const response = await fetch(
+      `https://graph.facebook.com/v21.0/${phoneNumberId}/messages`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messaging_product: 'whatsapp',
+          to: to,
+          type: 'template',
+          template: {
+            name: 'venda_seguro_celular',
+            language: {
+              code: 'en'
+            },
+            components: [
+              {
+                type: 'button',
+                sub_type: 'flow',
+                index: '1',
+                parameters: [
+                  {
+                    type: 'action',
+                    action: {
+                      flow_token: flowToken,
+                      flow_action_data: {}
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        })
+      }
+    );
+
+    const data = await response.json();
+    console.log('✅ Flow template sent:', data);
+    console.log('📋 Flow token:', flowToken);
+    return data;
+  } catch (error) {
+    console.error('❌ Error sending flow template:', error);
     throw error;
   }
 }
