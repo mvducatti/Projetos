@@ -311,7 +311,7 @@ async function sendTextMessage(to, text) {
 async function sendFlowTemplate(to) {
   const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-  const templateName = process.env.WHATSAPP_TEMPLATE_NAME || 'venda_seguro_celular';
+  const templateName = process.env.WHATSAPP_TEMPLATE_NAME || 'venda_zurich_celular';
   const templateLanguage = process.env.WHATSAPP_TEMPLATE_LANGUAGE || 'en';
 
   // Gera um flow_token único para rastrear esta conversa
