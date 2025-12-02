@@ -337,13 +337,15 @@ async function sendFlowTemplate(to) {
               {
                 type: 'button',
                 sub_type: 'flow',
-                index: '1',
+                index: '0',
                 parameters: [
                   {
                     type: 'action',
                     action: {
                       flow_token: flowToken,
-                      flow_action_data: {}
+                      flow_action_data: {
+                        initial_data: true
+                      }
                     }
                   }
                 ]
@@ -355,11 +357,17 @@ async function sendFlowTemplate(to) {
     );
 
     const data = await response.json();
-    console.log('✅ Flow template sent:', data);
-    console.log('📋 Flow token:', flowToken);
+    
+    if (data.error) {
+      console.error('❌ Error sending flow template:', JSON.stringify(data.error, null, 2));
+    } else {
+      console.log('✅ Flow template sent:', data);
+      console.log('📋 Flow token:', flowToken);
+    }
+    
     return data;
   } catch (error) {
-    console.error('❌ Error sending flow template:', error);
+    console.error('❌ Error sending flow template:', error.message);
     throw error;
   }
 }
