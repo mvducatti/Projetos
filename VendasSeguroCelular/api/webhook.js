@@ -311,6 +311,8 @@ async function sendTextMessage(to, text) {
 async function sendFlowTemplate(to) {
   const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+  const templateName = process.env.WHATSAPP_TEMPLATE_NAME || 'venda_seguro_celular';
+  const templateLanguage = process.env.WHATSAPP_TEMPLATE_LANGUAGE || 'en';
 
   // Gera um flow_token único para rastrear esta conversa
   const flowToken = `FLOW_${Date.now()}_${to}`;
@@ -329,23 +331,21 @@ async function sendFlowTemplate(to) {
           to: to,
           type: 'template',
           template: {
-            name: 'venda_seguro_celular',
+            name: templateName,
             language: {
-              code: 'en'
+              code: templateLanguage
             },
             components: [
               {
                 type: 'button',
                 sub_type: 'flow',
-                index: '0',
+                index: '1',
                 parameters: [
                   {
                     type: 'action',
                     action: {
                       flow_token: flowToken,
-                      flow_action_data: {
-                        initial_data: true
-                      }
+                      flow_action_data: {}
                     }
                   }
                 ]
@@ -359,15 +359,15 @@ async function sendFlowTemplate(to) {
     const data = await response.json();
     
     if (data.error) {
-      console.error('❌ Error sending flow template:', JSON.stringify(data.error, null, 2));
+      console.error('❌ Error sending template:', JSON.stringify(data.error, null, 2));
     } else {
-      console.log('✅ Flow template sent:', data);
+      console.log('✅ Template sent:', data);
       console.log('📋 Flow token:', flowToken);
     }
     
     return data;
   } catch (error) {
-    console.error('❌ Error sending flow template:', error.message);
+    console.error('❌ Error sending template:', error.message);
     throw error;
   }
 }
