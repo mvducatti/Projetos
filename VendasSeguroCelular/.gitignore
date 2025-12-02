@@ -10,6 +10,12 @@ package-lock.json
 .env.local
 .env.production
 
+# Private keys (CRITICAL - Never commit!)
+private.key
+public.key
+*.pem
+*.key
+
 # Logs
 *.log
 npm-debug.log*
@@ -32,3 +38,7 @@ build/
 
 # Local server
 server.js
+
+# Temporary files
+base64_image.txt
+svg_base64.txt
