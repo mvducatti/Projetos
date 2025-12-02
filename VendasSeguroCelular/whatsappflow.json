@@ -243,7 +243,7 @@
                             },
                             {
                                 "id": "reduzida",
-                                "title": "Reduzida (+15%)"
+                                "title": "Reduzida"
                             }
                         ]
                     },
@@ -339,7 +339,7 @@
                     {
                         "type": "TextInput",
                         "name": "imei",
-                        "label": "IMEI (Opcional se enviar foto)",
+                        "label": "IMEI",
                         "input-type": "number",
                         "required": false,
                         "helper-text": "Digite apenas 15 números ou deixe vazio e envie foto",

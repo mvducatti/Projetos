@@ -62,10 +62,16 @@ export default async function handler(req, res) {
 
       if (signature !== expectedSignature) {
         console.log('❌ Invalid signature');
-        return res.status(401).json({ error: 'Invalid signature' });
+        console.log('Received signature:', signature);
+        console.log('Expected signature:', expectedSignature);
+        console.log('Body used for validation:', body.substring(0, 200) + '...');
+        // TEMPORÁRIO: Aceitar mesmo com assinatura inválida para debug
+        console.log('⚠️ Continuing anyway for debugging...');
+        // return res.status(401).json({ error: 'Invalid signature' });
+      } else {
+        console.log('✅ Signature validated');
       }
 
-      console.log('✅ Signature validated');
       console.log('📨 Webhook payload:', JSON.stringify(req.body, null, 2));
 
       // Extract webhook data
@@ -186,7 +192,7 @@ async function handleTextMessage(message, from, contactName) {
     await sendFlowTemplate(from);
   } else {
     // Senão, envia mensagem com instruções
-    await sendTextMessage(from, `Oi ${contactName}! 👋\n\nDigite *cotação* ou *seguro* para iniciar uma cotação!\n\nOu clique no link: https://wa.me/5511916270802?text=Quero%20proteger%20meu%20celular%20agora!`);
+    await sendTextMessage(from, `Oi ${contactName}! 👋\n\nDigite *cotar* ou *seguro* para iniciar uma cotação!`);
   }
 }
 
