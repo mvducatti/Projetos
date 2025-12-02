@@ -326,11 +326,11 @@
                 "children": [
                     {
                         "type": "TextHeading",
-                        "text": "Validar IMEI"
+                        "text": "Validação do Aparelho"
                     },
                     {
                         "type": "TextBody",
-                        "text": "Forneça o IMEI do aparelho."
+                        "text": "Informe o IMEI OU envie uma foto/documento com o IMEI visível."
                     },
                      {
                         "type": "TextCaption",
@@ -339,17 +339,17 @@
                     {
                         "type": "TextInput",
                         "name": "imei",
-                        "label": "IMEI",
+                        "label": "IMEI (Opcional se enviar foto)",
                         "input-type": "number",
                         "required": false,
-                        "helper-text": "Digite apenas 15 números",
+                        "helper-text": "Digite apenas 15 números ou deixe vazio e envie foto",
                         "error-message": "${data.imei_error}"
                     },
                     {
                         "type": "DocumentPicker",
                         "name": "device_documents",
-                        "label": "Foto do IMEI",
-                        "description": "Envie documentos ou foto contendo o número de IMEI",
+                        "label": "Foto do IMEI (Opcional se digitar IMEI)",
+                        "description": "Envie foto/documento com IMEI visível ou deixe vazio e digite acima",
                         "min-uploaded-documents": 0,
                         "max-uploaded-documents": 1,
                         "max-file-size-kb": 5120
@@ -436,6 +436,9 @@
                         "name": "birth_date",
                         "label": "Data de Nascimento",
                         "required": true,
+                        "min-date": "1900-01-01",
+                        "max-date": "2025-12-02",
+                        "unavailable-dates": [],
                         "helper-text": "Você deve ter pelo menos 18 anos",
                         "error-message": "${data.birth_date_error}"
                     },

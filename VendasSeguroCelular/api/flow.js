@@ -521,9 +521,48 @@ export default async function handler(req, res) {
         let cpf_error = '';
         let phone_error = '';
         let birth_date_error = '';
+        let email_error = '';
+        
+        // Validate full name
+        if (!full_name || full_name.trim().length < 3) {
+          return sendEncryptedResponse({
+            screen: 'CLIENT_DATA',
+            data: {
+              cpf_error: '',
+              phone_error: '',
+              birth_date_error: 'Nome completo é obrigatório (mínimo 3 caracteres).'
+            }
+          });
+        }
+        
+        // Validate email
+        if (!email || email.trim().length === 0) {
+          return sendEncryptedResponse({
+            screen: 'CLIENT_DATA',
+            data: {
+              cpf_error: '',
+              phone_error: '',
+              birth_date_error: 'E-mail é obrigatório.'
+            }
+          });
+        }
+        
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email.trim())) {
+          return sendEncryptedResponse({
+            screen: 'CLIENT_DATA',
+            data: {
+              cpf_error: '',
+              phone_error: '',
+              birth_date_error: 'E-mail inválido. Use um formato válido (exemplo@email.com).'
+            }
+          });
+        }
         
         // Validate birth date (must be 18+ years old)
-        if (birth_date) {
+        if (!birth_date) {
+          birth_date_error = 'Data de nascimento é obrigatória.';
+        } else if (birth_date) {
           const birthDate = new Date(birth_date);
           const today = new Date();
           let age = today.getFullYear() - birthDate.getFullYear();
@@ -539,8 +578,12 @@ export default async function handler(req, res) {
         }
         
         // Validate CPF (11 digits)
+        if (!cpf || cpf.trim().length === 0) {
+          cpf_error = 'CPF é obrigatório.';
+        }
+        
         const cpfClean = cpf ? cpf.replace(/\D/g, '') : '';
-        if (!cpfClean || cpfClean.length !== 11) {
+        if (!cpf_error && (!cpfClean || cpfClean.length !== 11)) {
           cpf_error = 'CPF inválido. Deve conter 11 dígitos.';
         } else {
           // Validate CPF checksum
@@ -570,8 +613,12 @@ export default async function handler(req, res) {
         }
         
         // Validate phone (10 or 11 digits)
+        if (!phone || phone.trim().length === 0) {
+          phone_error = 'Telefone é obrigatório.';
+        }
+        
         const phoneClean = phone ? phone.replace(/\D/g, '') : '';
-        if (!phoneClean || (phoneClean.length !== 10 && phoneClean.length !== 11)) {
+        if (!phone_error && (!phoneClean || (phoneClean.length !== 10 && phoneClean.length !== 11))) {
           phone_error = 'Telefone inválido. Deve conter 10 ou 11 dígitos (DDD + número).';
         }
         
