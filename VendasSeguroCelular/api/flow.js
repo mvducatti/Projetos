@@ -253,20 +253,32 @@ export default async function handler(req, res) {
     // Handle INIT action (when user opens the flow)
     if (action === 'INIT') {
       console.log('🚀 INIT action - Loading first screen');
-      const brands = await getBrands();
+      console.log('📋 Flow token:', flow_token);
       
-      return sendEncryptedResponse({
-        screen: 'DEVICE_SELECTION',
-        data: {
-          brands: brands,
-          models: [],
-          memories: [],
-          selected_brand: '',
-          selected_model: '',
-          selected_memory: '',
-          device_id: ''
-        }
-      });
+      try {
+        const brands = await getBrands();
+        console.log('✅ Brands loaded:', brands.length, 'brands');
+        console.log('📱 First 3 brands:', JSON.stringify(brands.slice(0, 3)));
+        
+        const initData = {
+          screen: 'DEVICE_SELECTION',
+          data: {
+            brands: brands,
+            models: [],
+            memories: [],
+            selected_brand: '',
+            selected_model: '',
+            selected_memory: '',
+            device_id: ''
+          }
+        };
+        
+        console.log('📤 Sending INIT response with', brands.length, 'brands');
+        return sendEncryptedResponse(initData);
+      } catch (error) {
+        console.error('❌ Error in INIT action:', error);
+        throw error;
+      }
     }
 
     // Handle data_exchange action
