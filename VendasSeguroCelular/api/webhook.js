@@ -344,8 +344,7 @@ async function sendFlowTemplate(to) {
                   {
                     type: 'action',
                     action: {
-                      flow_token: flowToken,
-                      flow_action_data: {}
+                      flow_token: flowToken
                     }
                   }
                 ]
